@@ -67,6 +67,19 @@ class Trip {
             }
         });
 
+        // create a new trip
+        server.route({
+            method: 'POST',
+            path: '/trips',
+            config: {
+                handler: (request, reply) => {
+
+                },
+                description: 'create a new trip',
+                tags: ['api', 'trip']
+            }
+        });
+
 
         // Register
         return 'register';
