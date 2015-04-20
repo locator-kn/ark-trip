@@ -53,7 +53,7 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     this.db.getTrips((err, data) => {
-                        if(err) {
+                        if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
                         reply(data);
@@ -70,10 +70,23 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 handler: (request, reply) => {
-
+                    this.db.getTripById(request.params.tripid, (err, data) => {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
-                description: 'Get a particular trip',
-                tags: ['api', 'trip']
+                description: 'Get particular trip by id',
+                notes: 'sample call: /trips/1222123132',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    }
+                }
+
             }
         });
 
