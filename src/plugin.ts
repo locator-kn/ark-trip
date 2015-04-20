@@ -47,7 +47,7 @@ class Trip {
             budget: this.joi.number(),
             locations: this.joi.array(),
             pics: this.joi.array(),
-            type: this.joi.string().requried().valid('trip')
+            type: this.joi.string().required().valid('trip')
         });
 
         var rev = this.joi.object().keys({_rev: this.joi.string().required()});
@@ -190,7 +190,13 @@ class Trip {
                     });
                 },
                 description: 'delete a particular trip',
-                tags: ['api', 'trip']
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    }
+                }
             }
         });
 
