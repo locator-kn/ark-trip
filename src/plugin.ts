@@ -20,12 +20,15 @@ export interface ITrip {
 export default
 class Trip {
     db:any;
+    boom:any;
 
     constructor() {
         this.register.attributes = {
             name: 'backend-trip',
             version: '0.1.0'
         };
+
+        this.boom = require('boom');
     }
 
     register:IRegister = (server, options, next) => {
