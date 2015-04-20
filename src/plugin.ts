@@ -80,6 +80,20 @@ class Trip {
             }
         });
 
+        // update a particular trip
+        server.route({
+            method: 'PUT',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+
+                },
+                description: 'update a particular trip',
+                tags: ['api', 'trip']
+            }
+        });
+
+
 
         // Register
         return 'register';
