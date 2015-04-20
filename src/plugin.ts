@@ -41,7 +41,7 @@ class Trip {
     };
 
     private _register(server, options) {
-        // get user information about logged in user
+        // get all trips
         server.route({
             method: 'GET',
             path: '/trips',
@@ -53,6 +53,20 @@ class Trip {
                 tags: ['api', 'trip']
             }
         });
+
+        // get a particular trip
+        server.route({
+            method: 'GET',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+
+                },
+                description: 'Get a particular trip',
+                tags: ['api', 'trip']
+            }
+        });
+
 
         // Register
         return 'register';
