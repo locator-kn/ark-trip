@@ -123,7 +123,7 @@ class Trip {
                         if (err) {
                             return reply(this.boom.wrap(err, 400, err.details.message));
                         } else {
-                            this.db.createUser(trip, (err, data) => {
+                            this.db.createTrip(trip, (err, data) => {
                                 if (err) {
                                     return reply(this.boom.wrap(err, 400, err.details.message));
                                 }
