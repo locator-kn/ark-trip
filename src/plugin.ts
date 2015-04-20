@@ -19,6 +19,8 @@ export interface ITrip {
 
 export default
 class Trip {
+    db:any;
+
     constructor() {
         this.register.attributes = {
             name: 'backend-trip',
@@ -28,6 +30,12 @@ class Trip {
 
     register:IRegister = (server, options, next) => {
         server.bind(this);
+
+        server.dependency('backend-database', (server, next) => {
+            this.db = server.plugins['backend-database'];
+            next();
+        });
+
         this._register(server, options);
         next();
     };
