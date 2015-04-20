@@ -21,6 +21,7 @@ export default
 class Trip {
     db:any;
     boom:any;
+    joi:any;
 
     constructor() {
         this.register.attributes = {
@@ -29,6 +30,7 @@ class Trip {
         };
 
         this.boom = require('boom');
+        this.joi = require('joi');
     }
 
     register:IRegister = (server, options, next) => {
