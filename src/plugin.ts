@@ -31,6 +31,20 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
+        this.initSchemas();
+    }
+
+
+    private initSchemas():void {
+        var trip = this.joi.object().keys({
+            _id: this.joi.string().required(),
+            city: this.joi.string().required(),
+            start_date: this.joi.date(),
+            end_date: this.joi.date(),
+            budget: this.joi.number(),
+            locations: this.joi.array(),
+            pics: this.joi.array()
+        })
     }
 
     register:IRegister = (server, options, next) => {
@@ -140,4 +154,5 @@ class Trip {
             console.log('Error: Failed to load plugin (Trip):', error);
         }
     }
+
 }
