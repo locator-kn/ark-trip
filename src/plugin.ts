@@ -15,6 +15,7 @@ export interface ITrip {
     budget: number;
     locations: string[];
     pics: string[];
+    category: string;
     type: string;
 }
 
@@ -44,6 +45,7 @@ class Trip {
             start_date: this.joi.date(),
             end_date: this.joi.date(),
             budget: this.joi.number(),
+            category: this.joi.string(),
             locations: this.joi.array(),
             pics: this.joi.array(),
             type: this.joi.string().required().valid('trip')
