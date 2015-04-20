@@ -50,7 +50,12 @@ class Trip {
             path: '/trips',
             config: {
                 handler: (request, reply) => {
-
+                    this.db.getTrips((err, data) => {
+                        if(err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Get all trips',
                 tags: ['api', 'trip']
