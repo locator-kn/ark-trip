@@ -22,6 +22,8 @@ class Trip {
     db:any;
     boom:any;
     joi:any;
+    tripSchemaPost:any;
+    tripSchemaPUT:any;
 
     constructor() {
         this.register.attributes = {
@@ -44,7 +46,12 @@ class Trip {
             budget: this.joi.number(),
             locations: this.joi.array(),
             pics: this.joi.array()
-        })
+        });
+
+        var rev = this.joi.object().keys({_rev: this.joi.string().required()});
+
+        this.tripSchemaPost = trip;
+        this.tripSchemaPUT = rev.concat(trip);
     }
 
     register:IRegister = (server, options, next) => {
