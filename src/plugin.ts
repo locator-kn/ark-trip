@@ -117,10 +117,28 @@ class Trip {
             path: '/trips',
             config: {
                 handler: (request, reply) => {
+                    this.joi.validate(request.payload, this.tripSchemaPost, (err, trip:ITrip)=> {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400, err.details.message));
+                        } else {
+                            this.db.createUser(trip, (err, data) => {
+                                if (err) {
+                                    return reply(this.boom.wrap(err, 400, err.details.message));
+                                }
+                                reply(data);
+                            });
 
+                        }
+                    });
                 },
-                description: 'create a new trip',
-                tags: ['api', 'trip']
+                description: 'Create new trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    payload: this.tripSchemaPost
+                        .required()
+                        .description('Trip JSON object')
+                }
+
             }
         });
 
