@@ -94,6 +94,19 @@ class Trip {
         });
 
 
+        // delete a particular trip
+        server.route({
+            method: 'DELETE',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+
+                },
+                description: 'delete a particular trip',
+                tags: ['api', 'trip']
+            }
+        });
+
 
         // Register
         return 'register';
