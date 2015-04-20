@@ -182,7 +182,12 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 handler: (request, reply) => {
-
+                    this.db.deleteTripById(request.params.tripid, (err, data) => {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'delete a particular trip',
                 tags: ['api', 'trip']
