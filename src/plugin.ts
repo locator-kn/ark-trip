@@ -15,6 +15,7 @@ export interface ITrip {
     budget: number;
     locations: string[];
     pics: string[];
+    type: string;
 }
 
 export default
@@ -45,7 +46,8 @@ class Trip {
             end_date: this.joi.date(),
             budget: this.joi.number(),
             locations: this.joi.array(),
-            pics: this.joi.array()
+            pics: this.joi.array(),
+            type: this.joi.string().requried().valid('trip')
         });
 
         var rev = this.joi.object().keys({_rev: this.joi.string().required()});
