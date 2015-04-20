@@ -40,7 +40,6 @@ class Trip {
 
     private initSchemas():void {
         var trip = this.joi.object().keys({
-            _id: this.joi.string().required(),
             city: this.joi.string().required(),
             start_date: this.joi.date(),
             end_date: this.joi.date(),
@@ -50,7 +49,9 @@ class Trip {
             type: this.joi.string().required().valid('trip')
         });
 
-        var rev = this.joi.object().keys({_rev: this.joi.string().required()});
+        var rev = this.joi.object().keys({
+            _id: this.joi.string().required(),
+            _rev: this.joi.string().required()});
 
         this.tripSchemaPost = trip;
         this.tripSchemaPUT = rev.concat(trip);
