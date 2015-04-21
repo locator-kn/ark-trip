@@ -9,6 +9,8 @@ export interface IRegister {
 export interface ITrip {
     _id: string;
     _rev?: string;
+    title: string;
+    description: string;
     city: string;
     start_date: Date;
     end_date: Date;
@@ -41,6 +43,8 @@ class Trip {
 
     private initSchemas():void {
         var trip = this.joi.object().keys({
+            title: this.joi.string().required(),
+            description: this.joi.string().required(),
             city: this.joi.string().required(),
             start_date: this.joi.date(),
             end_date: this.joi.date(),
