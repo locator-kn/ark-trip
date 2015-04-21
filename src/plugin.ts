@@ -41,7 +41,12 @@ class Trip {
     }
 
 
+    /**
+     *    Init validation schemas for POST and PUT method.
+     *    We need two schemas because PUT required '_id' and '_rev'.
+     */
     private initSchemas():void {
+        // basic trip schema
         var trip = this.joi.object().keys({
             title: this.joi.string().required(),
             description: this.joi.string().required(),
@@ -55,12 +60,13 @@ class Trip {
             type: this.joi.string().required().valid('trip')
         });
 
-        var rev = this.joi.object().keys({
+        // required elements for PUT method.
+        var putMethodElements = this.joi.object().keys({
             _id: this.joi.string().required(),
             _rev: this.joi.string().required()});
 
         this.tripSchemaPost = trip;
-        this.tripSchemaPUT = rev.concat(trip);
+        this.tripSchemaPUT = putMethodElements.concat(trip);
     }
 
     register:IRegister = (server, options, next) => {
