@@ -84,6 +84,19 @@ class Trip {
     };
 
     private _register(server, options) {
+        // search for trips
+        server.route({
+            method: 'GET',
+            path: '/trips/search',
+            config: {
+                handler: (request, reply) => {
+                    // implement search function
+                },
+                description: 'Search for trips',
+                tags: ['api', 'trip']
+            }
+        });
+
         // get all trips
         server.route({
             method: 'GET',
