@@ -91,6 +91,9 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     // implement search function
+                    this.searchTrips(request.payload, (err, data) => {
+                        
+                    })
                 },
                 description: 'Search for trips',
                 tags: ['api', 'trip']
@@ -231,6 +234,10 @@ class Trip {
 
         // Register
         return 'register';
+    }
+
+    private searchTrips(payload:any, callback:Function):void {
+        callback();
     }
 
     errorInit(error) {
