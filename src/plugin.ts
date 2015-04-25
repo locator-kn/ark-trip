@@ -152,7 +152,7 @@ class Trip {
             path: '/data/moods',
             config: {
                 handler: (request, reply) => {
-                    this.db.createMood((err, data) => {
+                    this.db.createMood(request.payload, (err, data) => {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
