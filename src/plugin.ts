@@ -146,6 +146,24 @@ class Trip {
             }
         });
 
+        // create new mood
+        server.route({
+            method: 'POST',
+            path: '/data/moods',
+            config: {
+                handler: (request, reply) => {
+                    this.db.createMood((err, data) => {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
+                },
+                description: 'Create new mood',
+                tags: ['api', 'trip']
+            }
+        });
+
         // create a new trip
         server.route({
             method: 'POST',
