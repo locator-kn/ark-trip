@@ -65,7 +65,8 @@ class Trip {
         // required elements for PUT method.
         var putMethodElements = this.joi.object().keys({
             _id: this.joi.string().required(),
-            _rev: this.joi.string().required()});
+            _rev: this.joi.string().required()
+        });
 
         this.tripSchemaPost = trip;
         this.tripSchemaPUT = putMethodElements.concat(trip);
