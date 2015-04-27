@@ -171,19 +171,12 @@ class Trip {
             path: '/trips',
             config: {
                 handler: (request, reply) => {
-                    this.joi.validate(request.payload, this.tripSchemaPost, (err, trip:ITrip)=> {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400, err.details.message));
-                        } else {
-                            this.db.createTrip(trip, (err, data) => {
+                    this.db.createTrip(request.payload, (err, data) => {
                                 if (err) {
                                     return reply(this.boom.wrap(err, 400, err.details.message));
                                 }
                                 reply(data);
                             });
-
-                        }
-                    });
                 },
                 description: 'Create new trip',
                 tags: ['api', 'trip'],
