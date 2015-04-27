@@ -137,7 +137,7 @@ class Trip {
                 handler: (request, reply) => {
                     this.db.createTrip(request.payload, (err, data) => {
                                 if (err) {
-                                    return reply(this.boom.wrap(err, 400, err.details.message));
+                                    return reply(this.boom.wrap(err, 400));
                                 }
                                 reply(data);
                             });
@@ -161,7 +161,7 @@ class Trip {
                 handler: (request, reply) => {
                     this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
                                 if (err) {
-                                    return reply(this.boom.wrap(err, 400, err.details.message));
+                                    return reply(this.boom.wrap(err, 400));
                                 }
                                 reply(data);
                             });
