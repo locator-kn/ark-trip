@@ -129,42 +129,6 @@ class Trip {
             }
         });
 
-        // get all moods
-        server.route({
-            method: 'GET',
-            path: '/data/moods',
-            config: {
-                handler: (request, reply) => {
-                    this.db.getMoods((err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
-                description: 'Get all moods',
-                tags: ['api', 'trip']
-            }
-        });
-
-        // create new mood
-        server.route({
-            method: 'POST',
-            path: '/data/moods',
-            config: {
-                handler: (request, reply) => {
-                    this.db.createMood(request.payload, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
-                description: 'Create new mood',
-                tags: ['api', 'trip']
-            }
-        });
-
         // create a new trip
         server.route({
             method: 'POST',
