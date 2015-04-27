@@ -75,8 +75,8 @@ class Trip {
     register:IRegister = (server, options, next) => {
         server.bind(this);
 
-        server.dependency('backend-database', (server, next) => {
-            this.db = server.plugins['backend-database'];
+        server.dependency('ark-database', (server, next) => {
+            this.db = server.plugins['ark-database'];
             next();
         });
 
