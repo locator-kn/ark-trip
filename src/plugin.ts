@@ -195,19 +195,12 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 handler: (request, reply) => {
-                    this.joi.validate(request.payload, this.tripSchemaPUT, (err, trip:ITrip)=> {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400, err.details.message));
-                        } else {
-                            this.db.updateTrip(trip._id, trip._rev, trip, (err, data) => {
+                    this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
                                 if (err) {
                                     return reply(this.boom.wrap(err, 400, err.details.message));
                                 }
                                 reply(data);
                             });
-
-                        }
-                    });
                 },
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
