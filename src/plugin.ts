@@ -219,6 +219,10 @@ class Trip {
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
                 validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    },
                     payload: this.tripSchemaPUT
                         .required()
                         .description('Trip JSON object')
