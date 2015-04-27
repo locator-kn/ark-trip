@@ -32,7 +32,7 @@ class Trip {
 
     constructor() {
         this.register.attributes = {
-            name: 'backend-trip',
+            name: 'ark-trip',
             version: '0.1.0'
         };
 
