@@ -187,15 +187,7 @@ class Trip {
             }
         });
 
-
         // Register
         return 'register';
     }
-
-    errorInit(error) {
-        if (error) {
-            console.log('Error: Failed to load plugin (Trip):', error);
-        }
-    }
-
 }
