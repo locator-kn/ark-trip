@@ -3,25 +3,6 @@ export interface IRegister {
     attributes?: any;
 }
 
-/**
- * structure of a trip
- */
-export interface ITrip {
-    _id: string;
-    _rev?: string;
-    title: string;
-    description: string;
-    city: string;
-    start_date: Date;
-    end_date: Date;
-    budget: number;
-    overnight: number;
-    locations: string[];
-    pics: string[];
-    category: string;
-    type: string;
-}
-
 export default
 class Trip {
     db:any;
