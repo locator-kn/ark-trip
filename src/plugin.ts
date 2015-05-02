@@ -70,10 +70,10 @@ class Trip {
         server.route({
             method: 'GET',
             // TODO: city or plz? optional or required? url ok?
-            path: '/trips/search/{city?}',
+            path: '/trips/search/{opt?}',
             config: {
                 handler: (request, reply) => {
-                    this.searchTrips(request , (err, data) => {
+                    this.searchTrips(request, (err, data) => {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
@@ -136,11 +136,11 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     this.db.createTrip(request.payload, (err, data) => {
-                                if (err) {
-                                    return reply(this.boom.wrap(err, 400));
-                                }
-                                reply(data);
-                            });
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Create new trip',
                 tags: ['api', 'trip'],
@@ -160,11 +160,11 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
-                                if (err) {
-                                    return reply(this.boom.wrap(err, 400));
-                                }
-                                reply(data);
-                            });
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
@@ -212,10 +212,34 @@ class Trip {
 
     // search handler
     private searchTrips(request, callback) {
-        if(request.params.city){
-            this.db.getTripsByCity(request.params.city, callback);
+        if (request.params.opt) {
+            // split by _ -> city_mood1_mood2_moodX
+            var opts = request.params.opt.split("_");
+            if (opts[0]) {
+                this.db.getTripsByCity(opts[0], (err, data) => {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        this.restrictSearchByMoods(data, opts, callback);
+                    }
+                });
+            } else {
+                this.db.getTrips((err, data) => {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        this.restrictSearchByMoods(data, opts, callback);
+                    }
+                })
+            }
         } else {
+            // if no city and no mood commited
             this.db.getTrips(callback);
         }
     }
+
+    private restrictSearchByMoods(data, opts, callback) {
+        callback(null, data);
+    }
+
 }
