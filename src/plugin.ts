@@ -69,7 +69,7 @@ class Trip {
         // get all trips
         server.route({
             method: 'GET',
-            path: '/trips',
+            path: '/trips/{city?}',
             config: {
                 handler: (request, reply) => {
                     this.searchTrips(request , (err, data) => {
