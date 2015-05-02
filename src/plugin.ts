@@ -69,6 +69,7 @@ class Trip {
         // get all trips
         server.route({
             method: 'GET',
+            // TODO: city or plz? optional or required? url ok?
             path: '/trips/search/{city?}',
             config: {
                 handler: (request, reply) => {
@@ -79,13 +80,9 @@ class Trip {
                         reply(data);
                     });
                 },
-                description: 'Get all trips',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        city: this.joi.string()
-                    }
-                }
+                description: 'Search for trips',
+                notes: 'Search functionality is not supported with swagger',
+                tags: ['api', 'trip']
             }
         });
 
@@ -217,7 +214,8 @@ class Trip {
     private searchTrips(request, callback) {
         if(request.params.city){
             this.db.getTripsByCity(request.params.city, callback);
+        } else {
+            this.db.getTrips(callback);
         }
-        this.db.getTrips(callback);
     }
 }
