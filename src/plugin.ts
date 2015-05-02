@@ -69,10 +69,32 @@ class Trip {
         // get all trips
         server.route({
             method: 'GET',
-            path: '/trips/{city?}',
+            path: '/trips/search/{city?}',
             config: {
                 handler: (request, reply) => {
                     this.searchTrips(request , (err, data) => {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
+                },
+                description: 'Get all trips',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        city: this.joi.string()
+                    }
+                }
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/trips',
+            config: {
+                handler: (request, reply) => {
+                    this.db.getTrips((err, data) => {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
@@ -193,6 +215,9 @@ class Trip {
 
     // search handler
     private searchTrips(request, callback) {
-        this.db.searchTrips(callback);
+        if(request.params.city){
+            this.db.getTripsByCity(request.params.city, callback);
+        }
+        this.db.getTrips(callback);
     }
 }
