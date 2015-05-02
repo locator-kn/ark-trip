@@ -72,7 +72,7 @@ class Trip {
             path: '/trips',
             config: {
                 handler: (request, reply) => {
-                    this.db.getTrips((err, data) => {
+                    this.searchTrips(request , (err, data) => {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
@@ -189,5 +189,10 @@ class Trip {
 
         // Register
         return 'register';
+    }
+
+    // search handler
+    private searchTrips(request, callback) {
+        this.db.searchTrips(callback);
     }
 }
