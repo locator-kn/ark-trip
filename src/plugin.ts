@@ -240,8 +240,21 @@ class Trip {
     }
 
     private restrictSearchByMoods(data, opts, callback) {
-        if(opts.length > 0) {
-            callback(null, data);
+        if (opts.length > 0) {
+            var elements = new Array();
+            data.forEach((element)=> {
+                var toPush = false;
+                opts.forEach((mood)=> {
+                    if (element.category.indexOf(mood) > -1) {
+                        toPush = true;
+                    }
+                });
+                if(toPush){
+                    elements.push(element);
+                }
+
+            });
+            callback(null,elements);
         } else {
             callback(null, data);
         }
