@@ -241,7 +241,7 @@ class Trip {
 
     private restrictSearchByMoods(data, opts, callback) {
         if (opts.length > 0) {
-            var elements = new Array();
+            var elements = [];
             data.forEach((element)=> {
                 var toPush = false;
                 opts.forEach((mood)=> {
