@@ -216,7 +216,8 @@ class Trip {
             // split by _ -> city_mood1_mood2_moodX
             var opts = request.params.opt.split("_");
             if (opts[0]) {
-                this.db.getTripsByCity(opts[0], (err, data) => {
+                var city = opts.shift();
+                this.db.getTripsByCity(city, (err, data) => {
                     if (err) {
                         callback(err);
                     } else {
@@ -239,7 +240,11 @@ class Trip {
     }
 
     private restrictSearchByMoods(data, opts, callback) {
-        callback(null, data);
+        if(opts.length > 0) {
+            callback(null, data);
+        } else {
+            callback(null, data);
+        }
     }
 
 }
