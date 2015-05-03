@@ -73,6 +73,7 @@ class Trip {
             method: 'GET',
             path: '/trips',
             config: {
+                auth: false,
                 handler: (request, reply) => {
                     this.db.getTrips((err, data) => {
                         if (err) {
@@ -91,6 +92,7 @@ class Trip {
             method: 'GET',
             path: '/trips/{tripid}',
             config: {
+                auth: false,
                 handler: (request, reply) => {
                     this.db.getTripById(request.params.tripid, (err, data) => {
                         if (err) {
