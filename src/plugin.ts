@@ -31,6 +31,8 @@ class Trip {
         // basic trip schema
         var trip = this.joi.object().keys({
             title: this.joi.string().required(),
+            // read form session
+            userid: this.joi.string().optional(),
             description: this.joi.string().required(),
             city: this.joi.string().required(),
             start_date: this.joi.date(),
@@ -116,6 +118,7 @@ class Trip {
             path: '/trips',
             config: {
                 handler: (request, reply) => {
+                    // TODO: read user id from session and create trip with this info
                     this.db.createTrip(request.payload, (err, data) => {
                                 if (err) {
                                     return reply(this.boom.wrap(err, 400));
