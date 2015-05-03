@@ -215,7 +215,9 @@ class Trip {
         if (request.params.opt) {
             // split by _ -> city_mood1_mood2_moodX
             var opts = request.params.opt.split("_");
+            // check if city param is committed.
             if (opts[0]) {
+                // save first parameter and remove it from array
                 var city = opts.shift();
                 this.db.getTripsByCity(city, (err, data) => {
                     if (err) {
@@ -234,25 +236,28 @@ class Trip {
                 })
             }
         } else {
-            // if no city and no mood commited
+            // if no city and no mood committed
             this.db.getTrips(callback);
         }
     }
 
     private restrictSearchByMoods(data, opts, callback) {
+        // check if moods committed
         if (opts.length > 0) {
             var elements = [];
             data.forEach((element)=> {
+                // to save no duplicated elements
                 var toPush = false;
                 opts.forEach((mood)=> {
+                    // check if element contains a required mood
                     if (element.category.indexOf(mood) > -1) {
                         toPush = true;
+                        // TODO: break each -> currently only one match of a category required
                     }
                 });
                 if(toPush){
                     elements.push(element);
                 }
-
             });
             callback(null,elements);
         } else {
