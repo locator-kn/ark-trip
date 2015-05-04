@@ -216,7 +216,12 @@ class Trip {
         return 'register';
     }
 
-    // search handler
+    /**
+     * Function to search trips by parameters.
+     *
+     * @param request
+     * @param callback
+     */
     private searchTrips(request, callback) {
         if (request.params.opts) {
             // split by _ -> city_mood1_mood2_moodX
@@ -225,6 +230,7 @@ class Trip {
             if (opts[0]) {
                 // save first parameter and remove it from array
                 var city = opts.shift();
+                // query to search trips between a start and end date.
                 var query = {
                     startkey: [city, (request.query.checkin || ""), ""],
                     endkey: [city, {}, (request.query.checkout || {})]
@@ -251,6 +257,13 @@ class Trip {
         }
     }
 
+    /**
+     * Function to specific the search by moods. Only one match of a category is required.
+     *
+     * @param data
+     * @param opts
+     * @param callback
+     */
     private restrictSearchByMoods(data, opts, callback) {
         // check if moods committed
         if (opts.length > 0) {
@@ -262,7 +275,7 @@ class Trip {
                     // check if element contains a required mood
                     if (element.category.indexOf(mood) > -1) {
                         toPush = true;
-                        // TODO: break each -> currently only one match of a category required
+                        // TODO: break each if one mood is found
                     }
                 });
                 if (toPush) {
