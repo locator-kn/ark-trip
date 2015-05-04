@@ -219,7 +219,11 @@ class Trip {
             if (opts[0]) {
                 // save first parameter and remove it from array
                 var city = opts.shift();
-                this.db.getTripsByCity(city, (err, data) => {
+                var query = {
+                    startkey: [city, (request.query.checkin || "")],
+                    endkey: [city, (request.query.checkout || {})]
+                };
+                this.db.getTripsByCityQuery(query, (err, data) => {
                     if (err) {
                         callback(err);
                     } else {
@@ -255,11 +259,11 @@ class Trip {
                         // TODO: break each -> currently only one match of a category required
                     }
                 });
-                if(toPush){
+                if (toPush) {
                     elements.push(element);
                 }
             });
-            callback(null,elements);
+            callback(null, elements);
         } else {
             callback(null, data);
         }
