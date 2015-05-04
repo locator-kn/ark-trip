@@ -11,6 +11,15 @@ class Trip {
     tripSchemaPost:any;
     tripSchemaPUT:any;
 
+    private RELEVANCE_CONFIG = {
+        RELEVANCE_SUM: 1,
+        RELEVANCE_MOODS: 0.4,
+        RELEVANCE_DAYS: 0.2,
+        RELEVANCE_PERSONS: 0.2,
+        RELEVANCE_BUDGET: 0.1,
+        RELEVANCE_ACCOMMODATIONS: 0.1
+    };
+
     constructor() {
         this.register.attributes = {
             name: 'ark-trip',
