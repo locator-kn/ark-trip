@@ -72,7 +72,7 @@ class Trip {
         server.route({
             method: 'GET',
             // TODO: city or plz? optional or required? url ok?
-            path: '/trips/search/{opt?}',
+            path: '/trips/search/{opts?}',
             config: {
                 auth: false,
                 handler: (request, reply) => {
@@ -218,9 +218,9 @@ class Trip {
 
     // search handler
     private searchTrips(request, callback) {
-        if (request.params.opt) {
+        if (request.params.opts) {
             // split by _ -> city_mood1_mood2_moodX
-            var opts = request.params.opt.split("_");
+            var opts = request.params.opts.split("_");
             // check if city param is committed.
             if (opts[0]) {
                 // save first parameter and remove it from array
