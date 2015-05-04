@@ -226,8 +226,8 @@ class Trip {
                 // save first parameter and remove it from array
                 var city = opts.shift();
                 var query = {
-                    startkey: [city, (request.query.checkin || "")],
-                    endkey: [city, (request.query.checkout || {})]
+                    startkey: [city, (request.query.checkin || ""), ""],
+                    endkey: [city, {}, (request.query.checkout || {})]
                 };
                 this.db.getTripsByCityQuery(query, (err, data) => {
                     if (err) {
