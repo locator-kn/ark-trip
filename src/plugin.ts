@@ -74,6 +74,7 @@ class Trip {
             // TODO: city or plz? optional or required? url ok?
             path: '/trips/search/{opt?}',
             config: {
+                auth: false,
                 handler: (request, reply) => {
                     this.searchTrips(request, (err, data) => {
                         if (err) {
