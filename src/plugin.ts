@@ -239,7 +239,7 @@ class Trip {
                     if (err) {
                         callback(err);
                     } else {
-                        this.restrictSearchByMoods(data, opts, callback);
+                        this.restrictSearch(data, opts, callback);
                     }
                 });
             } else {
@@ -247,7 +247,7 @@ class Trip {
                     if (err) {
                         callback(err);
                     } else {
-                        this.restrictSearchByMoods(data, opts, callback);
+                        this.restrictSearch(data, opts, callback);
                     }
                 })
             }
@@ -255,6 +255,12 @@ class Trip {
             // if no city and no mood committed
             this.db.getTrips(callback);
         }
+    }
+
+    private restrictSearch(data, opts, callback) {
+        this.restrictSearchByMoods(data, opts, (data)=> {
+
+        });
     }
 
     /**
@@ -282,9 +288,9 @@ class Trip {
                     elements.push(element);
                 }
             });
-            callback(null, elements);
+            callback(elements);
         } else {
-            callback(null, data);
+            callback(data);
         }
     }
 
