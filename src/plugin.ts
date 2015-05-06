@@ -87,6 +87,38 @@ class Trip {
             }
         });
 
+        // get preview picture of a particular trip
+        server.route({
+            method: 'GET',
+            path: '/trips/{tripid}/{name}-trip.{ext}',
+            config: {
+                // TODO: check auth
+                auth: false,
+                handler: (request, reply) => {
+                    reply(request.params.name);
+                    //this.db.getPicture(request.params.tripid, )
+                    //var readStream = new Readabele().wrap(stream);
+                    //reply(readStream)
+                },
+                description: 'Get the preview picture of a ' +
+                'particular trip by id',
+                notes: 'sample call: /trips/1222123132/nameOfTheTrip-trip.jpg',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required(),
+                        name: this.joi.string()
+                            .required(),
+                        ext: this.joi.string()
+                            .required().regex(/^jpg|png$/)
+                    }
+                }
+
+            }
+        });
+
+
         // get a particular trip
         server.route({
             method: 'GET',
