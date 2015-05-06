@@ -95,10 +95,17 @@ class Trip {
                 // TODO: check auth
                 auth: false,
                 handler: (request, reply) => {
-                    reply(request.params.name);
-                    //this.db.getPicture(request.params.tripid, )
-                    //var readStream = new Readabele().wrap(stream);
-                    //reply(readStream)
+                    // create file name
+                    var file = request.params.name + '-trip.' + request.params.ext;
+
+                    // get file stream from database
+                    this.db.getPicture(request.params.tripid, file, (err, data) => {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        // reply stream
+                        reply(data)
+                    });
                 },
                 description: 'Get the preview picture of a ' +
                 'particular trip by id',
@@ -154,11 +161,11 @@ class Trip {
                 handler: (request, reply) => {
                     // TODO: read user id from session and create trip with this info
                     this.db.createTrip(request.payload, (err, data) => {
-                                if (err) {
-                                    return reply(this.boom.wrap(err, 400));
-                                }
-                                reply(data);
-                            });
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Create new trip',
                 tags: ['api', 'trip'],
@@ -178,11 +185,11 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
-                                if (err) {
-                                    return reply(this.boom.wrap(err, 400));
-                                }
-                                reply(data);
-                            });
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
