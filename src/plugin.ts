@@ -114,12 +114,11 @@ class Trip {
         // get all trips
         server.route({
             method: 'GET',
-            // TODO: city or plz? optional or required? url ok?
             path: '/trips/search/{opts?}',
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    this.searchTrips(request, (err, data) => {
+                    this.db.searchTripsByQuery(query, (err, data)=> {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
