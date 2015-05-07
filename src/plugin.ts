@@ -11,7 +11,6 @@ class Trip {
     tripSchemaPost:any;
     tripSchemaPUT:any;
 
-    const
     viewName_Search = '_design/search';
 
     // TODO: fix compiler errors for 'emit', 'getRow' and 'send'
@@ -42,9 +41,10 @@ class Trip {
                 var queryParams = JSON.stringify(req.query);
                 while (row = getRow()) {
                     if (queryParams != '{}' && (row.key == req.query.city)) {
+                        var moods;
+                        var possibleRelevance;
                         var relevance = {
-                            moods_sum: 0,
-                            moods_hit: 0,
+                            moods: 0,
                             budget: 0,
                             persons: 0,
                             days: 0,
@@ -53,13 +53,17 @@ class Trip {
                         var toPush = true;
                         if (req.query.moods) {
                             toPush = false;
+                            moods = {
+                                moods_sum: 0,
+                                moods_hit: 0
+                            };
                             var moods = req.query.moods.split('_');
 
                             moods.forEach(function (mood) {
-                                relevance.moods_sum++;
+                                moods.moods_sum++;
                                 if (row.value.category.indexOf(mood) > -1) {
                                     toPush = true;
-                                    relevance.moods_hit++;
+                                    moods.moods_hit++;
                                 }
                             });
                         }
@@ -69,28 +73,35 @@ class Trip {
                             }
                         }
                         if (toPush) {
+                            if (req.query.moods) {
+                                relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS / moods.moods_sum * moods.moods_hit;
+                            }
                             if (req.query.budget) {
-                                relevance.budget--;
                                 if (req.query.budget <= row.value.budget) {
-                                    relevance.budget++;
+                                    relevance.budget = RELEVANCE_CONFIG.RELEVANCE_BUDGET;
                                 }
                             }
                             if (req.query.persons) {
                                 if (req.query.persons <= row.value.budget) {
-                                    relevance.persons++;
+                                    relevance.persons = RELEVANCE_CONFIG.RELEVANCE_BUDGET;
                                 }
                             }
                             if (req.query.days) {
                                 if (req.query.days <= row.value.days) {
-                                    relevance.days++;
+                                    relevance.days = RELEVANCE_CONFIG.RELEVANCE_DAYS;
                                 }
                             }
                             if (req.query.accommodations) {
                                 if (req.query.accommodations <= row.value.accommodations) {
-                                    relevance.accommodations++;
+                                    relevance.accommodations = RELEVANCE_CONFIG.RELEVANCE_ACCOMMODATIONS;
                                 }
                             }
-                            row.value.relevance = relevance;
+
+                            var total = 0;
+                            for (var property in relevance) {
+                                total += relevance[property];
+                            }
+                            row.value.relevance = total;
                             result.push(row.value);
                         }
                     }
