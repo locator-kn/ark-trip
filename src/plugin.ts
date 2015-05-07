@@ -140,8 +140,14 @@ class Trip {
                     });
                 },
                 description: 'Search for trips',
-                notes: 'Search functionality is not supported with swagger',
-                tags: ['api', 'trip']
+                notes: 'Search functionality  is not supported with swagger',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        opts: this.joi.string()
+                            .required().description('city_mood1_mood2_moodX')
+                    }
+                }
             }
         });
 
