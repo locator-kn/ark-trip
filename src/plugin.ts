@@ -41,7 +41,7 @@ class Trip {
                 var queryParams = JSON.stringify(req.query);
                 while (row = getRow()) {
                     if (queryParams != '{}' && (row.key == req.query.city)) {
-                        var moods;
+                        var moods_relevance;
                         var possibleRelevance;
                         var relevance = {
                             moods: 0,
@@ -53,17 +53,17 @@ class Trip {
                         var toPush = true;
                         if (req.query.moods) {
                             toPush = false;
-                            moods = {
+                            moods_relevance = {
                                 moods_sum: 0,
                                 moods_hit: 0
                             };
                             var moods = req.query.moods.split('_');
 
                             moods.forEach(function (mood) {
-                                moods.moods_sum++;
+                                moods_relevance.moods_sum++;
                                 if (row.value.category.indexOf(mood) > -1) {
                                     toPush = true;
-                                    moods.moods_hit++;
+                                    moods_relevance.moods_hit++;
                                 }
                             });
                         }
@@ -74,34 +74,43 @@ class Trip {
                         }
                         if (toPush) {
                             if (req.query.moods) {
-                                relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS / moods.moods_sum * moods.moods_hit;
+                                possibleRelevance = RELEVANCE_CONFIG.RELEVANCE_MOODS;
+                                // FIXME: geteilt durch -> javascript?
+                                relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS / moods_relevance.moods_sum * moods_relevance.moods_hit;
                             }
                             if (req.query.budget) {
+                                possibleRelevance =+ RELEVANCE_CONFIG.RELEVANCE_BUDGET;
                                 if (req.query.budget <= row.value.budget) {
                                     relevance.budget = RELEVANCE_CONFIG.RELEVANCE_BUDGET;
                                 }
                             }
                             if (req.query.persons) {
+                                possibleRelevance =+ RELEVANCE_CONFIG.RELEVANCE_PERSONS;
                                 if (req.query.persons <= row.value.budget) {
                                     relevance.persons = RELEVANCE_CONFIG.RELEVANCE_BUDGET;
                                 }
                             }
                             if (req.query.days) {
+                                possibleRelevance =+ RELEVANCE_CONFIG.RELEVANCE_DAYS;
                                 if (req.query.days <= row.value.days) {
                                     relevance.days = RELEVANCE_CONFIG.RELEVANCE_DAYS;
                                 }
                             }
                             if (req.query.accommodations) {
+                                possibleRelevance =+ RELEVANCE_CONFIG.RELEVANCE_ACCOMMODATIONS;
                                 if (req.query.accommodations <= row.value.accommodations) {
                                     relevance.accommodations = RELEVANCE_CONFIG.RELEVANCE_ACCOMMODATIONS;
                                 }
                             }
 
+                            row.value.test = relevance;
+                            row.value.moods = moods;
                             var total = 0;
                             for (var property in relevance) {
-                                total += relevance[property];
+                                total =+ relevance[property];
                             }
-                            row.value.relevance = total;
+
+                            row.value.relevance = (total * 100 / possibleRelevance);
                             result.push(row.value);
                         }
                     }
