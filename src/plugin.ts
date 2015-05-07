@@ -120,9 +120,11 @@ class Trip {
                 handler: (request, reply) => {
                     // split by _ -> city_mood1_mood2_moodX
                     var opts = request.params.opts.split("_");
-
+                    // save first parameter and remove it from list
+                    var city = opts.shift;
+                    // create query for couchdb
                     var query = {
-                        city: (request.query.city || ""),
+                        city: (city || ""),
                         start_date: (request.query.start_date || ""),
                         end_date: (request.query.end_date || "")
                     };
@@ -216,7 +218,7 @@ class Trip {
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    this.db.createView('_design/search', this.searchList , (err)=> {
+                    this.db.createView('_design/search', this.searchList, (err)=> {
                         reply(err);
                     });
                 },
