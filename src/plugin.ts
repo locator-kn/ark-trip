@@ -125,7 +125,7 @@ class Trip {
                     // split by _ -> city_mood1_mood2_moodX
                     var opts = request.params.opts.split("_");
                     // save first parameter and remove it from list
-                    var city = opts.shift;
+                    var city = opts.shift();
                     // create query for couchdb
                     var query = {
                         city: (city || ""),
@@ -228,7 +228,7 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     this.db.createView(this.viewName_Search, this.searchList, (err, msg)=> {
-                        if(err) {
+                        if (err) {
                             return reply(this.boom.wrap(err, 400));
                         } else {
                             reply(msg);
