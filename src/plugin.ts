@@ -11,6 +11,9 @@ class Trip {
     tripSchemaPost:any;
     tripSchemaPUT:any;
 
+    const
+    viewName_Search = '_design/search';
+
     // list for couchdb the search a trip
     searchList = {
         views: {
@@ -211,18 +214,18 @@ class Trip {
             }
         });
 
-        // create a new trip
+        // create the views for couchdb
         server.route({
             method: 'POST',
             path: '/trips/setup',
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    this.db.createView('_design/search', this.searchList, (err)=> {
+                    this.db.createView(this.viewName_Search, this.searchList, (err)=> {
                         reply(err);
                     });
                 },
-                description: 'Create new trip',
+                description: 'Setup all views and lists for couchdb',
                 tags: ['api', 'trip']
             }
         });
