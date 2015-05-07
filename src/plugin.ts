@@ -114,10 +114,13 @@ class Trip {
         // get all trips
         server.route({
             method: 'GET',
-            path: '/trips/search/{opts?}',
+            path: '/trips/search/{opts}',
             config: {
                 auth: false,
                 handler: (request, reply) => {
+                    // split by _ -> city_mood1_mood2_moodX
+                    var opts = request.params.opts.split("_");
+
                     var query = {
                         city: (request.query.city || ""),
                         start_date: (request.query.start_date || ""),
