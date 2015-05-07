@@ -11,6 +11,40 @@ class Trip {
     tripSchemaPost:any;
     tripSchemaPUT:any;
 
+    // list for couchdb the search a trip
+    searchList = {
+        views: {
+            city: {
+                "map": function (doc) {
+                    if (doc.type == 'trip') {
+                        emit(doc.city, doc);
+                    }
+                }
+            }
+        },
+        lists: {
+            searchlist: function (head, req) {
+                var row;
+                var result = [];
+                var queryParams = JSON.stringify(req.query);
+                while (row = getRow()) {
+                    if (queryParams != '{}' && (row.key == req.query.city)) {
+                        if (!req.query.start_date || !req.query.end_date) {
+                            result.push(row.value);
+                        } else {
+                            if (req.query.start_date <= row.value.start_date && req.query.end_date >= row.value.end_date) {
+                                result.push(row.value);
+                            } else {
+                                result.push('huhu');
+                            }
+                        }
+                    }
+                }
+                send(JSON.stringify(result))
+            }
+        }
+    };
+
     private RELEVANCE_CONFIG = {
         RELEVANCE_SUM: 1,
         RELEVANCE_MOODS: 0.4,
