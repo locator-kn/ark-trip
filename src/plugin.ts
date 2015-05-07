@@ -202,6 +202,22 @@ class Trip {
             }
         });
 
+        // create a new trip
+        server.route({
+            method: 'POST',
+            path: '/trips/setup',
+            config: {
+                auth: false,
+                handler: (request, reply) => {
+                    this.db.createView('_design/search', this.searchList , (err)=> {
+                        reply(err);
+                    });
+                },
+                description: 'Create new trip',
+                tags: ['api', 'trip']
+            }
+        });
+
         // update a particular trip
         server.route({
             method: 'PUT',
