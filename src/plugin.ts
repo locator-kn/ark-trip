@@ -14,6 +14,7 @@ class Trip {
     const
     viewName_Search = '_design/search';
 
+    // TODO: fix compiler errors for 'emit', 'getRow' and 'send'
     // list for couchdb the search a trip
     searchList = {
         views: {
