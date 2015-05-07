@@ -219,7 +219,6 @@ class Trip {
             method: 'POST',
             path: '/trips/setup',
             config: {
-                auth: false,
                 handler: (request, reply) => {
                     this.db.createView(this.viewName_Search, this.searchList, (err, msg)=> {
                         if(err) {
