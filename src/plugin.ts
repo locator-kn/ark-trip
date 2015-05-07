@@ -129,8 +129,13 @@ class Trip {
                     // create query for couchdb
                     var query = {
                         city: (city || ""),
+                        moods: (opts || ""),
                         start_date: (request.query.start_date || ""),
-                        end_date: (request.query.end_date || "")
+                        end_date: (request.query.end_date || ""),
+                        budget: (request.query.budget || ""),
+                        persons: (request.query.persons || ""),
+                        days: (request.query.days || ""),
+                        accommodations: (request.query.accommodations || "")
                     };
                     this.db.searchTripsByQuery(query, (err, data)=> {
                         if (err) {
