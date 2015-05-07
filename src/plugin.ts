@@ -126,6 +126,12 @@ class Trip {
                         }
                     }
                 }
+
+                if(req.query.limit) {
+                    // TODO: sort array by relevance
+                    // TODO: send only 'limit' trips
+                }
+
                 send(JSON.stringify(result))
             }
         }
