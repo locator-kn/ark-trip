@@ -217,7 +217,6 @@ class Trip {
                         accommodations: (request.query.accommodations || ""),
                         limit: (request.query.limit || "")
                     };
-                    console.log(query);
                     this.db.searchTripsByQuery(query, (err, data)=> {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
