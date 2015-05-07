@@ -221,8 +221,12 @@ class Trip {
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    this.db.createView(this.viewName_Search, this.searchList, (err)=> {
-                        reply(err);
+                    this.db.createView(this.viewName_Search, this.searchList, (err, msg)=> {
+                        if(err) {
+                            return reply(this.boom.wrap(err, 400));
+                        } else {
+                            reply(msg);
+                        }
                     });
                 },
                 description: 'Setup all views and lists for couchdb',
