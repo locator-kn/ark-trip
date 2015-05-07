@@ -28,34 +28,74 @@ class Trip {
         },
         lists: {
             searchlist: function (head, req) {
+                var RELEVANCE_CONFIG = {
+                    RELEVANCE_SUM: 1,
+                    RELEVANCE_MOODS: 0.4,
+                    RELEVANCE_DAYS: 0.2,
+                    RELEVANCE_PERSONS: 0.2,
+                    RELEVANCE_BUDGET: 0.1,
+                    RELEVANCE_ACCOMMODATIONS: 0.1
+                };
                 var row;
                 var result = [];
                 var queryParams = JSON.stringify(req.query);
                 while (row = getRow()) {
                     if (queryParams != '{}' && (row.key == req.query.city)) {
-                        if (!req.query.start_date || !req.query.end_date) {
-                            result.push(row.value);
-                        } else {
-                            if (req.query.start_date <= row.value.start_date && req.query.end_date >= row.value.end_date) {
-                                result.push(row.value);
-                            } else {
-                                result.push('huhu');
+                        var relevance = {
+                            moods_sum: 0,
+                            moods_hit: 0,
+                            budget: 0,
+                            persons: 0,
+                            days: 0,
+                            accommodations: 0
+                        };
+                        var toPush = true;
+                        if (req.query.moods) {
+                            toPush = false;
+                            var moods = req.query.moods.split('_');
+
+                            moods.forEach(function (mood) {
+                                relevance.moods_sum++;
+                                if (row.value.category.indexOf(mood) > -1) {
+                                    toPush = true;
+                                    relevance.moods_hit++;
+                                }
+                            });
+                        }
+                        if (req.query.start_date && req.query.end_date) {
+                            if (req.query.start_date > row.value.start_date || req.query.end_date < row.value.end_date) {
+                                toPush = false;
                             }
+                        }
+                        if (toPush) {
+                            if (req.query.budget) {
+                                if (req.query.budget <= row.value.budget) {
+                                    relevance.budget++;
+                                }
+                            }
+                            if (req.query.persons) {
+                                if (req.query.persons <= row.value.budget) {
+                                    relevance.persons++;
+                                }
+                            }
+                            if (req.query.days) {
+                                if (req.query.days <= row.value.days) {
+                                    relevance.days++;
+                                }
+                            }
+                            if (req.query.accommodations) {
+                                if (req.query.accommodations <= row.value.accommodations) {
+                                    relevance.accommodations++;
+                                }
+                            }
+                            row.value.relevance = relevance;
+                            result.push(row.value);
                         }
                     }
                 }
                 send(JSON.stringify(result))
             }
         }
-    };
-
-    private RELEVANCE_CONFIG = {
-        RELEVANCE_SUM: 1,
-        RELEVANCE_MOODS: 0.4,
-        RELEVANCE_DAYS: 0.2,
-        RELEVANCE_PERSONS: 0.2,
-        RELEVANCE_BUDGET: 0.1,
-        RELEVANCE_ACCOMMODATIONS: 0.1
     };
 
     constructor() {
@@ -129,7 +169,7 @@ class Trip {
                     // create query for couchdb
                     var query = {
                         city: (city || ""),
-                        moods: (opts || ""),
+                        moods: (opts.join('_') || ""),
                         start_date: (request.query.start_date || ""),
                         end_date: (request.query.end_date || ""),
                         budget: (request.query.budget || ""),
@@ -137,6 +177,7 @@ class Trip {
                         days: (request.query.days || ""),
                         accommodations: (request.query.accommodations || "")
                     };
+                    console.log(query);
                     this.db.searchTripsByQuery(query, (err, data)=> {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
