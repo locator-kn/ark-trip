@@ -15,6 +15,7 @@ class Trip {
     viewName_Search = '_design/search';
 
     // TODO: fix compiler errors for 'emit', 'getRow' and 'send'
+    // TODO: performance measurement for relevance check
     // list for couchdb the search a trip
     searchList = {
         views: {
@@ -69,6 +70,7 @@ class Trip {
                         }
                         if (toPush) {
                             if (req.query.budget) {
+                                relevance.budget--;
                                 if (req.query.budget <= row.value.budget) {
                                     relevance.budget++;
                                 }
