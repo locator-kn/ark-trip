@@ -118,6 +118,11 @@ class Trip {
             config: {
                 auth: false,
                 handler: (request, reply) => {
+                    var query = {
+                        city: (request.query.city || ""),
+                        start_date: (request.query.start_date || ""),
+                        end_date: (request.query.end_date || "")
+                    };
                     this.db.searchTripsByQuery(query, (err, data)=> {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
