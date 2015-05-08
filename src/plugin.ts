@@ -80,27 +80,7 @@ class Trip {
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    // split by _ -> city_mood1_mood2_moodX
-                    var opts = request.params.opts.split("_");
-                    // save first parameter and remove it from list
-                    var city = opts.shift();
-                    // create query for couchdb
-                    var query = {
-                        city: (city || ""),
-                        moods: (opts.join('_') || ""),
-                        start_date: (request.query.start_date || ""),
-                        end_date: (request.query.end_date || ""),
-                        budget: (request.query.budget || ""),
-                        persons: (request.query.persons || ""),
-                        days: (request.query.days || ""),
-                        accommodations: (request.query.accommodations || "")
-                    };
-                    this.db.searchTripsByQuery(query, (err, data)=> {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
+                    this.searchTrips(request, reply);
                 },
                 description: 'Search for trips',
                 notes: 'Search functionality  is not supported with swagger',
@@ -258,5 +238,29 @@ class Trip {
 
         // Register
         return 'register';
+    }
+
+    private searchTrips(request, reply) {
+        // split by _ -> city_mood1_mood2_moodX
+        var opts = request.params.opts.split("_");
+        // save first parameter and remove it from list
+        var city = opts.shift();
+        // create query for couchdb
+        var query = {
+            city: (city || ""),
+            moods: (opts.join('_') || ""),
+            start_date: (request.query.start_date || ""),
+            end_date: (request.query.end_date || ""),
+            budget: (request.query.budget || ""),
+            persons: (request.query.persons || ""),
+            days: (request.query.days || ""),
+            accommodations: (request.query.accommodations || "")
+        };
+        this.db.searchTripsByQuery(query, (err, data)=> {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
     }
 }
