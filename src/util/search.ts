@@ -1,7 +1,10 @@
 // describe the shape of libraries not written in TypeScript
-declare var emit: any;
-declare var getRow: any;
-declare var send: any;
+declare
+var emit:any;
+declare
+var getRow:any;
+declare
+var send:any;
 
 export default
 class Search {
@@ -112,6 +115,11 @@ class Search {
                             var total = 0;
                             for (var property in relevance) {
                                 total += relevance[property];
+                            }
+                            // workaround if no param hit
+                            if (total == 0) {
+                                total = 1;
+                                possibleRelevance = possibleRelevance * 2;
                             }
                             row.value.relevance = (total * 100 / possibleRelevance);
 
