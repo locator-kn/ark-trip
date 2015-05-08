@@ -155,15 +155,17 @@ class Trip {
 
                 },
                 description: 'Update/Change the picture of a particular trip',
-                note: 'The picture in the database will be updated. The User defines which one',
+                notes: 'The picture in the database will be updated. The User defines which one',
                 tags: ['api', 'trip'],
                 validate: {
-                    tripid: this.joi.string()
-                        .required(),
-                    name: this.joi.string()
-                        .required(),
-                    ext: this.joi.string()
-                        .required().regex(/^jpg|png$/),
+                    params: {
+                        tripid: this.joi.string()
+                            .required(),
+                        name: this.joi.string()
+                            .required(),
+                        ext: this.joi.string()
+                            .required().regex(/^jpg|png$/)
+                    },
                     payload: {
                         filename: this.joi.string().required()
 
