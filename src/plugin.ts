@@ -93,8 +93,7 @@ class Trip {
                         budget: (request.query.budget || ""),
                         persons: (request.query.persons || ""),
                         days: (request.query.days || ""),
-                        accommodations: (request.query.accommodations || ""),
-                        limit: (request.query.limit || "")
+                        accommodations: (request.query.accommodations || "")
                     };
                     this.db.searchTripsByQuery(query, (err, data)=> {
                         if (err) {
