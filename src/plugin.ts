@@ -125,6 +125,53 @@ class Trip {
             }
         });
 
+        // update a  picture of a trip
+        server.route({
+            method: 'PUT',
+            path: '/trips/{tripid}/{name}.{ext}',
+            config: {
+                // TODO check auth
+                auth: false,
+                payload: {
+                    output: 'stream',
+                    parse: true,
+                    allow: 'multipart/form-data',
+                    // TODO: evaluate real value
+                    maxBytes: 1000000000000
+                },
+                handler: (request, reply) => {
+                    var width = request.payload.width;
+                    var height = request.payload.height;
+                    var xCoord = request.payload.xCoord;
+                    var yCoord = request.payload.yCoord;
+
+                    var attachmentData = {
+                        name: request.payload.filename, // file, which will be overwritten
+                        'Content-Type': 'multipart/form-data'
+                    };
+
+                    // create a read stream
+                    var readStream = request.payload.file;
+
+                },
+                description: 'Update/Change the picture of a particular trip',
+                note: 'The picture in the database will be updated. The User defines which one',
+                tags: ['api', 'trip'],
+                validate: {
+                    tripid: this.joi.string()
+                        .required(),
+                    name: this.joi.string()
+                        .required(),
+                    ext: this.joi.string()
+                        .required().regex(/^jpg|png$/),
+                    payload: {
+                        filename: this.joi.string().required()
+
+                    }
+                }
+            }
+        });
+
 
         // get a particular trip
         server.route({
