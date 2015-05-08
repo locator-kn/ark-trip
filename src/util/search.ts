@@ -1,9 +1,13 @@
+// describe the shape of libraries not written in TypeScript
+declare var emit: any;
+declare var getRow: any;
+declare var send: any;
+
 export default
 class Search {
 
     public viewName_Search = '_design/search';
 
-    // TODO: fix compiler errors for 'emit', 'getRow' and 'send'
     // TODO: performance measurement for relevance check
     // list for couchdb the search a trip
     public searchList = {
