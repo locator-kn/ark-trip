@@ -13,6 +13,7 @@ class Trip {
     tripSchemaPost:any;
     tripSchemaPUT:any;
     search:any;
+    _:any; // underscore.js
 
 
     constructor() {
@@ -23,6 +24,7 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
+        this._ = require('underscore');
         this.initSchemas();
         this.search = new Search();
     }
@@ -260,6 +262,7 @@ class Trip {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
+            this._.sortBy(data, 'relevance');
             reply(data);
         });
     }
