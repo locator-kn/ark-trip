@@ -123,8 +123,8 @@ class Trip {
 
         // update a  picture of a trip
         server.route({
-            method: 'PUT',
-            path: '/trips/{tripid}/{name}.{ext}',
+            method: ['PUT', 'POST'],
+            path: '/trips/{tripid}/picture',
             config: {
                 // TODO check auth
                 auth: false,
@@ -136,34 +136,54 @@ class Trip {
                     maxBytes: 1000000000000
                 },
                 handler: (request, reply) => {
-                    var width = request.payload.width;
-                    var height = request.payload.height;
-                    var xCoord = request.payload.xCoord;
-                    var yCoord = request.payload.yCoord;
+                    var width = request.payload.dimensions.width;
+                    var height = request.payload.dimensions.height;
+                    var xCoord = request.payload.dimensions.xCoord;
+                    var yCoord = request.payload.dimensions.yCoord;
 
-                    var attachmentData = {
-                        name: request.payload.filename, // file, which will be overwritten
-                        'Content-Type': 'multipart/form-data'
-                    };
+                    // file, which will be updated
+                    var filename = request.payload.nameOfTrip + '-trip';
 
-                    // create a read stream
-                    var readStream = request.payload.file;
+                    // create a read stream and crop it
+                    var readStream = this.gm(request.payload.file)
+                        .crop(width, height, xCoord, yCoord)
+                        .stream();
+
+                    this.db.savePicture(request.params.tripid, filename, readStream, (err) => {
+                        if (err) {
+                            reply(err);
+                        } else {
+                            reply({message: 'ok'});
+                        }
+                    })
 
                 },
                 description: 'Update/Change the picture of a particular trip',
-                notes: 'The picture in the database will be updated. The User defines which one',
+                notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
                         tripid: this.joi.string()
-                            .required(),
-                        name: this.joi.string()
-                            .required(),
-                        ext: this.joi.string()
-                            .required().regex(/^jpg|png$/)
+                            .required()
                     },
                     payload: {
-                        filename: this.joi.string().required()
+                        nameOfTrip: this.joi.string().required(),
+                        // validate file type to be an image
+                        file: this.joi.object({
+                            hapi: {
+                                headers: {
+                                    'content-type': this.joi.string().regex(/^image\/(?:jpg|png|jpeg)$/).required()
+                                }
+                            }
+                        }).options({allowUnknown: true}),
+
+                        // validate that a correct dimension object is emitted
+                        dimensions: this.joi.object({
+                            width: this.joi.number().integer().positive().required(),
+                            height: this.joi.number().integer().positive().required(),
+                            xCoord: this.joi.number().integer().positive().required(),
+                            yCoord: this.joi.number().integer().positive().required()
+                        }).required()
 
                     }
                 }
