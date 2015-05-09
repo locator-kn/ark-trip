@@ -119,6 +119,10 @@ class Search {
                             // workaround if no param hit
                             if (total == 0) {
                                 total = 1;
+                                if (!possibleRelevance) {
+                                    // workaround if only city and date is committed
+                                    possibleRelevance = 0.5;
+                                }
                                 possibleRelevance = possibleRelevance * 2;
                             }
                             row.value.relevance = (total * 100 / possibleRelevance);
