@@ -1,3 +1,5 @@
+import Search from './util/search';
+
 export interface IRegister {
     (server:any, options:any, next:any): void;
     attributes?: any;
@@ -10,6 +12,8 @@ class Trip {
     joi:any;
     tripSchemaPost:any;
     tripSchemaPUT:any;
+    search:any;
+
 
     constructor() {
         this.register.attributes = {
@@ -20,6 +24,7 @@ class Trip {
         this.boom = require('boom');
         this.joi = require('joi');
         this.initSchemas();
+        this.search = new Search();
     }
 
 
@@ -69,6 +74,26 @@ class Trip {
 
     private _register(server, options) {
         // get all trips
+        server.route({
+            method: 'GET',
+            path: '/trips/search/{opts}',
+            config: {
+                auth: false,
+                handler: (request, reply) => {
+                    this.searchTrips(request, reply);
+                },
+                description: 'Search for trips',
+                notes: 'Search functionality  is not supported with swagger',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        opts: this.joi.string()
+                            .required().description('city_mood1_mood2_moodX')
+                    }
+                }
+            }
+        });
+
         server.route({
             method: 'GET',
             path: '/trips',
@@ -122,11 +147,11 @@ class Trip {
                 handler: (request, reply) => {
                     // TODO: read user id from session and create trip with this info
                     this.db.createTrip(request.payload, (err, data) => {
-                                if (err) {
-                                    return reply(this.boom.wrap(err, 400));
-                                }
-                                reply(data);
-                            });
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Create new trip',
                 tags: ['api', 'trip'],
@@ -139,6 +164,25 @@ class Trip {
             }
         });
 
+        // create the views for couchdb
+        server.route({
+            method: 'POST',
+            path: '/trips/setup',
+            config: {
+                handler: (request, reply) => {
+                    this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        } else {
+                            reply(msg);
+                        }
+                    });
+                },
+                description: 'Setup all views and lists for couchdb',
+                tags: ['api', 'trip']
+            }
+        });
+
         // update a particular trip
         server.route({
             method: 'PUT',
@@ -146,11 +190,11 @@ class Trip {
             config: {
                 handler: (request, reply) => {
                     this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
-                                if (err) {
-                                    return reply(this.boom.wrap(err, 400));
-                                }
-                                reply(data);
-                            });
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        reply(data);
+                    });
                 },
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
@@ -194,5 +238,29 @@ class Trip {
 
         // Register
         return 'register';
+    }
+
+    private searchTrips(request, reply) {
+        // split by _ -> city_mood1_mood2_moodX
+        var opts = request.params.opts.split("_");
+        // save first parameter and remove it from list
+        var city = opts.shift();
+        // create query for couchdb
+        var query = {
+            city: (city || ""),
+            moods: (opts.join('_') || ""),
+            start_date: (request.query.start_date || ""),
+            end_date: (request.query.end_date || ""),
+            budget: (request.query.budget || ""),
+            persons: (request.query.persons || ""),
+            days: (request.query.days || ""),
+            accommodations: (request.query.accommodations || "")
+        };
+        this.db.searchTripsByQuery(query, (err, data)=> {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
     }
 }
