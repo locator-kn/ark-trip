@@ -137,8 +137,4 @@ class Search {
             }
         }
     };
-
-    constructor() {
-    }
-
 }
