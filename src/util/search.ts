@@ -117,7 +117,7 @@ class Search {
                                 total += relevance[property];
                             }
                             // workaround if no param hit
-                            if (total == 0) {
+                            if (total === 0) {
                                 total = 1;
                                 if (!possibleRelevance) {
                                     // workaround if only city and date is committed
