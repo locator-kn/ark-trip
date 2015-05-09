@@ -40,7 +40,7 @@ class Search {
                     // city param is required
                     if (queryParams != '{}' && (row.key == req.query.city)) {
                         var moods_relevance;
-                        var possibleRelevance;
+                        var possibleRelevance = 0;
                         // status object for relevance check
                         var relevance = {
                             moods: 0,
