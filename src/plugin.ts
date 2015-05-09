@@ -155,7 +155,11 @@ class Trip {
                         } else {
                             reply({message: 'ok'});
                         }
-                    })
+                    });
+
+                    // TODO: also save thumbnail
+
+                    // TODO: also update URL in trip document
 
                 },
                 description: 'Update/Change the picture of a particular trip',
