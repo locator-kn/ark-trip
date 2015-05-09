@@ -10,6 +10,7 @@ class Trip {
     joi:any;
     tripSchemaPost:any;
     tripSchemaPUT:any;
+    gm:any;
 
     constructor() {
         this.register.attributes = {
@@ -19,6 +20,7 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
+        this.gm = require('gm');
         this.initSchemas();
     }
 
@@ -90,22 +92,16 @@ class Trip {
         // get preview picture of a particular trip
         server.route({
             method: 'GET',
-            path: '/trips/{tripid}/{name}-trip.{ext}',
+            path: '/trips/{tripid}/{name}.{ext}',
             config: {
                 // TODO: check auth
                 auth: false,
                 handler: (request, reply) => {
                     // create file name
-                    var file = request.params.name + '-trip.' + request.params.ext;
+                    var file = request.params.name + '.' + request.params.ext;
 
-                    // get file stream from database
-                    this.db.getPicture(request.params.tripid, file, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        // reply stream
-                        reply(data)
-                    });
+                    // get and reply file stream from database
+                    reply(this.db.getPicture(request.params.tripid, file));
                 },
                 description: 'Get the preview picture of a ' +
                 'particular trip by id',
@@ -118,7 +114,7 @@ class Trip {
                         name: this.joi.string()
                             .required(),
                         ext: this.joi.string()
-                            .required().regex(/^jpg|png$/)
+                            .required().regex(/^jpeg|jpg|png$/)
                     }
                 }
 
