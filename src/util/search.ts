@@ -40,7 +40,7 @@ class Search {
                     // city param is required
                     if (queryParams != '{}' && (row.key == req.query.city)) {
                         var moods_relevance;
-                        var possibleRelevance;
+                        var possibleRelevance = 0;
                         // status object for relevance check
                         var relevance = {
                             moods: 0,
@@ -117,7 +117,7 @@ class Search {
                                 total += relevance[property];
                             }
                             // workaround if no param hit
-                            if (total == 0) {
+                            if (total === 0) {
                                 total = 1;
                                 if (!possibleRelevance) {
                                     // workaround if only city and date is committed
