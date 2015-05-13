@@ -243,14 +243,14 @@ class Trip {
     }
 
     private searchTrips(request, reply) {
-        // split by _ -> city_mood1_mood2_moodX
-        var opts = request.params.opts.split("_");
+        // split by _ -> city.mood1.mood2.moodX
+        var opts = request.params.opts.split(".");
         // save first parameter and remove it from list
         var city = opts.shift();
         // create query for couchdb
         var query = {
             city: (city || ""),
-            moods: (opts.join('_') || ""),
+            moods: (opts.join('.') || ""),
             start_date: (request.query.start_date || ""),
             end_date: (request.query.end_date || ""),
             budget: (request.query.budget || ""),
