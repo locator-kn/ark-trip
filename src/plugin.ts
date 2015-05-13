@@ -12,6 +12,8 @@ class Trip {
     tripSchemaPUT:any;
     gm:any;
     regex:any;
+    search:any;
+    _:any; // underscore.js
 
     constructor() {
         this.register.attributes = {
@@ -23,7 +25,9 @@ class Trip {
         this.joi = require('joi');
         this.gm = require('gm');
         this.regex = require('locators-regex');
+        this._ = require('underscore');
         this.initSchemas();
+        this.search = new Search();
     }
 
 
@@ -73,6 +77,26 @@ class Trip {
 
     private _register(server, options) {
         // get all trips
+        server.route({
+            method: 'GET',
+            path: '/trips/search/{opts}',
+            config: {
+                auth: false,
+                handler: (request, reply) => {
+                    this.searchTrips(request, reply);
+                },
+                description: 'Search for trips',
+                notes: 'Search functionality  is not supported with swagger',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        opts: this.joi.string()
+                            .required().description('city_mood1_mood2_moodX')
+                    }
+                }
+            }
+        });
+
         server.route({
             method: 'GET',
             path: '/trips',
@@ -279,6 +303,25 @@ class Trip {
             }
         });
 
+        // create the views for couchdb
+        server.route({
+            method: 'POST',
+            path: '/trips/setup',
+            config: {
+                handler: (request, reply) => {
+                    this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        } else {
+                            reply(msg);
+                        }
+                    });
+                },
+                description: 'Setup all views and lists for couchdb',
+                tags: ['api', 'trip']
+            }
+        });
+
         // update a particular trip
         server.route({
             method: 'PUT',
@@ -334,5 +377,30 @@ class Trip {
 
         // Register
         return 'register';
+    }
+
+    private searchTrips(request, reply) {
+        // split by _ -> city.mood1.mood2.moodX
+        var opts = request.params.opts.split(".");
+        // save first parameter and remove it from list
+        var city = opts.shift();
+        // create query for couchdb
+        var query = {
+            city: (city || ""),
+            moods: (opts.join('.') || ""),
+            start_date: (request.query.start_date || ""),
+            end_date: (request.query.end_date || ""),
+            budget: (request.query.budget || ""),
+            persons: (request.query.persons || ""),
+            days: (request.query.days || ""),
+            accommodations: (request.query.accommodations || "")
+        };
+        this.db.searchTripsByQuery(query, (err, data)=> {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            this._.sortBy(data, 'relevance');
+            reply(data);
+        });
     }
 }

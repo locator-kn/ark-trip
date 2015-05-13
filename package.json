@@ -1,6 +1,6 @@
 {
   "name": "ark-trip",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Plugin to handle trips",
   "main": "index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "joi": "^6.2.0",
     "locators-regex": "0.0.1",
     "sinon": "^1.14.1",
-    "typescript": "^1.5.0-alpha"
+    "typescript": "^1.5.0-alpha",
+    "underscore": "^1.8.3"
   }
 }
