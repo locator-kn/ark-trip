@@ -139,11 +139,29 @@ class Trip {
                 },
                 handler: (request, reply) => {
 
-                    // file, which will be updated
-                    var filename = request.payload.nameOfTrip + '-trip.'
-                        + request.payload.file.hapi.headers['content-type']
-                            .match(this.regex.imageExtension);
+                    var ext = request.payload.file.hapi.headers['content-type']
+                        .match(this.regex.imageExtension);
 
+                    // file, which will be updated
+                    var filename = request.payload.nameOfTrip + '-trip.' + ext;
+                    var thumbname = request.payload.nameOfTrip + '-trip-thumb.' + ext;
+
+
+                    // "/i/" will be mapped to /api/vX/ from nginx
+                    var url = '/i/users/' + request.params.userid + '/' + filename;
+                    var thumbURL = '/i/users/' + request.params.userid + '/' + thumbname;
+
+                    var imageLocation = {
+                        picture: url,
+                        thumbnail: thumbURL
+                    };
+
+                    function replySuccess() {
+                        reply({
+                            message: 'ok',
+                            imageLocation
+                        });
+                    }
 
                     // create a read stream and crop it
                     var readStream = this.gm(request.payload.file)
@@ -151,19 +169,29 @@ class Trip {
                         , request.payload.height
                         , request.payload.xCoord
                         , request.payload.yCoord)
+                        .resize(200,200) // TODO: needs to be discussed
                         .stream();
 
-                    this.db.savePicture(request.params.tripid, filename, readStream, (err) => {
-                        if (err) {
-                            reply(err);
-                        } else {
-                            reply({message: 'ok'});
-                        }
-                    });
+                    // create a read stream and crop it
+                    var thumbnailStream = this.gm(request.payload.file)
+                        .crop(request.payload.width
+                        , request.payload.height
+                        , request.payload.xCoord
+                        , request.payload.yCoord)
+                        .resize(120,120) // TODO: needs to be discussed
+                        .stream();
 
-                    // TODO: also save thumbnail
-
-                    // TODO: also update URL in trip document
+                    this.db.savePicture(request.params.tripid, filename, readStream)
+                        .then(() => {
+                            return this.db.savePicture(request.params.tripid, thumbname, thumbnailStream);
+                        })
+                        .then(() => {
+                            return this.db.updateDocument(request.params.tripid, {images: imageLocation});
+                        })
+                        .then(replySuccess)
+                        .catch((err) => {
+                            return reply(this.boom.badRequest(err));
+                        });
 
                 },
                 description: 'Update/Change the picture of a particular trip',
