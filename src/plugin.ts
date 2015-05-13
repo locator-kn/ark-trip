@@ -115,7 +115,7 @@ class Trip {
             }
         });
 
-        // get preview picture of a particular trip
+        // get a (one of optional many) picture of a particular trip
         server.route({
             method: 'GET',
             path: '/trips/{tripid}/{name}.{ext}',
@@ -129,8 +129,8 @@ class Trip {
                     // get and reply file stream from database
                     reply(this.db.getPicture(request.params.tripid, file));
                 },
-                description: 'Get the preview picture of a ' +
-                'particular trip by id',
+                description: 'Get a picture of a ' +
+                'particular trip by id. Could be any picture of the trip.',
                 notes: 'sample call: /trips/1222123132/nameOfTheTrip-trip.jpg',
                 tags: ['api', 'trip'],
                 validate: {
