@@ -185,8 +185,8 @@ class Trip {
 
 
                     // "/i/" will be mapped to /api/vX/ from nginx
-                    var url = '/i/users/' + request.params.userid + '/' + filename;
-                    var thumbURL = '/i/users/' + request.params.userid + '/' + thumbname;
+                    var url = '/i/trips/' + request.params.tripid + '/' + filename;
+                    var thumbURL = '/i/trips/' + request.params.tripid + '/' + thumbname;
 
                     var imageLocation = {
                         picture: url,
