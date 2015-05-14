@@ -1,3 +1,5 @@
+import Search from './util/search';
+
 export interface IRegister {
     (server:any, options:any, next:any): void;
     attributes?: any;
@@ -10,6 +12,7 @@ class Trip {
     joi:any;
     tripSchemaPost:any;
     tripSchemaPUT:any;
+    imageSchema:any
     gm:any;
     regex:any;
     search:any;
@@ -61,6 +64,16 @@ class Trip {
 
         this.tripSchemaPost = trip;
         this.tripSchemaPUT = putMethodElements.concat(trip);
+        this.imageSchema = this.joi.object({
+            hapi: {
+                headers: {
+                    'content-type': this.joi.string()
+                        .regex(this.regex.imageContentType)
+                        .required()
+                }
+            }
+        }).options({allowUnknown: true}).required();
+
     }
 
     register:IRegister = (server, options, next) => {
