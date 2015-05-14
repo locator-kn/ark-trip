@@ -236,8 +236,95 @@ class Trip {
                                         .regex(this.regex.imageContentType)
                                         .required()
                                 }
+        // update a  picture of a trip
+        server.route({
+            method: 'PUT',
+            path: '/trips/{tripid}/picture/more',
+            config: {
+                // TODO check auth
+                auth: false,
+                payload: {
+                    output: 'stream',
+                    parse: true,
+                    allow: 'multipart/form-data',
+                    // TODO: evaluate real value
+                    maxBytes: 1000000000000
+                },
+                handler: (request, reply) => {
+
+                    // check first if entry exist in the database
+                    this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
+                        .catch((err) => {
+                            return reply(this.boom.badRequest(err));
+                        }).then((value) => {
+
+                            var ext = request.payload.file.hapi.headers['content-type']
+                                .match(this.regex.imageExtension);
+
+                            // file, which will be updated
+                            var filename = request.payload.nameOfFile + '.' + ext;
+                            var thumbname = request.payload.nameOfFile + '-thumb.' + ext;
+
+                            // "/i/" will be mapped to /api/vX/ from nginx
+                            var url = '/i/trips/' + request.params.tripid + '/' + filename;
+                            var thumbURL = '/i/trips/' + request.params.tripid + '/' + thumbname;
+
+                            var imageLocation = {
+                                picture: url,
+                                thumbnail: thumbURL
+                            };
+
+                            function replySuccess() {
+                                reply({
+                                    message: 'ok',
+                                    imageLocation
+                                });
                             }
-                        }).options({allowUnknown: true}).required(),
+
+                            // create a read stream and crop it
+                            var readStream = this.gm(request.payload.file)
+                                .crop(request.payload.width
+                                , request.payload.height
+                                , request.payload.xCoord
+                                , request.payload.yCoord)
+                                .resize(1500, 675) // TODO: needs to be discussed
+                                .stream();
+
+                            // create a read stream and crop it
+                            var thumbnailStream = this.gm(request.payload.file)
+                                .crop(request.payload.width
+                                , request.payload.height
+                                , request.payload.xCoord
+                                , request.payload.yCoord)
+                                .resize(120, 120) // TODO: needs to be discussed
+                                .stream();
+
+                            this.db.savePicture(request.params.tripid, filename, readStream)
+                                .then(() => {
+                                    return this.db.savePicture(request.params.tripid, thumbname, thumbnailStream);
+                                })
+                                .then(() => {
+                                    return this.db.updateDocument(request.params.tripid, {images: imageLocation});
+                                })
+                                .then(replySuccess)
+                                .catch((err) => {
+                                    return reply(this.boom.badRequest(err));
+                                });
+                        });
+
+                },
+                description: 'Update/Change the picture of a particular trip',
+                notes: 'The picture in the database will be updated. The User defines which one.',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    },
+                    payload: {
+                        nameOfFile: this.joi.string().min(1).required(),
+                        // validate file type to be an image
+                        file: this.imageSchema,
                         // validate that a correct dimension object is emitted
                         width: this.joi.number().integer().required(),
                         height: this.joi.number().integer().required(),
