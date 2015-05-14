@@ -160,7 +160,7 @@ class Trip {
             }
         });
 
-        // update a  picture of a trip
+        // update/create the main picture of a trip
         server.route({
             method: ['PUT', 'POST'],
             path: '/trips/{tripid}/picture',
@@ -206,7 +206,7 @@ class Trip {
                         , request.payload.height
                         , request.payload.xCoord
                         , request.payload.yCoord)
-                        .resize(200,200) // TODO: needs to be discussed
+                        .resize(1500, 675) // TODO: needs to be discussed
                         .stream();
 
                     // create a read stream and crop it
@@ -215,7 +215,7 @@ class Trip {
                         , request.payload.height
                         , request.payload.xCoord
                         , request.payload.yCoord)
-                        .resize(120,120) // TODO: needs to be discussed
+                        .resize(120, 120) // TODO: needs to be discussed
                         .stream();
 
                     this.db.savePicture(request.params.tripid, filename, readStream)
@@ -231,7 +231,7 @@ class Trip {
                         });
 
                 },
-                description: 'Update/Change the picture of a particular trip',
+                description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
                 validate: {
@@ -281,8 +281,9 @@ class Trip {
                                 .match(this.regex.imageExtension);
 
                             // file, which will be updated
-                            var filename = request.payload.nameOfFile + '.' + ext;
-                            var thumbname = request.payload.nameOfFile + '-thumb.' + ext;
+                            var file = request.payload.nameOfFile.split('.')[0];
+                            var filename = file + '.' + ext;
+                            var thumbname = file + '-thumb.' + ext;
 
                             // "/i/" will be mapped to /api/vX/ from nginx
                             var url = '/i/trips/' + request.params.tripid + '/' + filename;
@@ -332,7 +333,7 @@ class Trip {
                         });
 
                 },
-                description: 'Update/Change the picture of a particular trip',
+                description: 'Update/Change one of the pictures of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
                 validate: {
