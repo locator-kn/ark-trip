@@ -242,13 +242,19 @@ class Trip {
                     payload: {
                         nameOfTrip: this.joi.string().required(),
                         // validate file type to be an image
-                        file: this.joi.object({
-                            hapi: {
-                                headers: {
-                                    'content-type': this.joi.string()
-                                        .regex(this.regex.imageContentType)
-                                        .required()
-                                }
+                        file: this.imageSchema,
+                        // validate that a correct dimension object is emitted
+                        width: this.joi.number().integer().required(),
+                        height: this.joi.number().integer().required(),
+                        xCoord: this.joi.number().integer().required(),
+                        yCoord: this.joi.number().integer().required()
+
+
+                    }
+                }
+            }
+        });
+
         // update a  picture of a trip
         server.route({
             method: 'PUT',
