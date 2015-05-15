@@ -33,13 +33,13 @@
 #### parameters
 |Parameter| optional / required | info |
 |---|---|---|
-|city| required | /trips/**city**|
-|mood| optional | /trips/**_mood1_mood2_mood3**|
-|city/mood| required| /trips/**city_mood1_mood2**|
-|checkin/checkout| optional | /trips/city_mood1/**?checkin=2015-05-15&checkout=2015-05-05** - if committed, use db query to get only trips between checkin and checkout|
-|days|optional|/trips/city_mood1/**?days=2**|
-|persons|optional|/trips/city_mood1/**?persons=3**|
-|budget|optional|/trips/city_mood1/**?budget=56**|
+|city| required | /trips/search/**city**|
+|mood| optional | /trips/search/**_mood1_mood2_mood3**|
+|city/mood| required| /trips/search/**city_mood1_mood2**|
+|checkin/checkout| optional | /trips/search/city_mood1/**?checkin=2015-05-15&checkout=2015-05-05** - if committed, use db query to get only trips between checkin and checkout|
+|days|optional|/trips/search/city_mood1/**?days=2**|
+|persons|optional|/trips/search/city_mood1/**?persons=3**|
+|budget|optional|/trips/search/city_mood1/**?budget=56**|
 
 #### result relevance
 |parameter|relevance|
