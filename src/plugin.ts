@@ -50,7 +50,7 @@ class Trip {
             end_date: this.joi.date(),
             budget: this.joi.number(),
             overnight: this.joi.number(),
-            category: this.joi.string(),
+            moods: this.joi.string(),
             locations: this.joi.array(),
             pics: this.joi.array(),
             type: this.joi.string().required().valid('trip')
