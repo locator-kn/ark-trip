@@ -8,7 +8,7 @@
 |/trips   | return all trips | json object | statusCode: 404 | 
 |/trips/:tripID   |  return a particular trip by id | json object | statusCode: 404 | 
 |/trips/search/*(see below)   | search for a trip | json object with all matches | statusCode: 404 |
-*/trips/search/konstanz.mood1.mood2.mood3?budget=100&checkin=2015-05-17&checkout=2015-05-19&persons=3 
+*/trips/search/konstanz.mood1.mood2.mood3?budget=100start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z&persons=3 
 !!before '?' no '/' (at the moment..)"
 
 
@@ -36,10 +36,12 @@
 |city| required | /trips/search/**city**|
 |mood| optional | /trips/search/**_mood1_mood2_mood3**|
 |city/mood| required| /trips/search/**city_mood1_mood2**|
-|checkin/checkout| optional | /trips/search/city_mood1/**?checkin=2015-05-15&checkout=2015-05-05** - if committed, use db query to get only trips between checkin and checkout|
+|checkin/checkout| optional | /trips/search/city_mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z** - if committed, use db query to get only trips between checkin and checkout|
 |days|optional|/trips/search/city_mood1/**?days=2**|
 |persons|optional|/trips/search/city_mood1/**?persons=3**|
 |budget|optional|/trips/search/city_mood1/**?budget=56**|
+
+start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
 
 #### result relevance
 |parameter|relevance|
