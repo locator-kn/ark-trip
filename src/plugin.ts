@@ -12,7 +12,7 @@ class Trip {
     joi:any;
     tripSchemaPost:any;
     tripSchemaPUT:any;
-    imageSchema:any
+    imageSchema:any;
     gm:any;
     regex:any;
     search:any;
@@ -120,6 +120,7 @@ class Trip {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
+                        // TODO: limit dataaaa
                         reply(data);
                     });
                 },
@@ -144,7 +145,8 @@ class Trip {
                 },
                 description: 'Get a picture of a ' +
                 'particular trip by id. Could be any picture of the trip.',
-                notes: 'sample call: /trips/1222123132/nameOfTheTrip-trip.jpg',
+                notes: 'sample call: /trips/1222123132/nameOfTheTrip-trip.jpg. The url is found, when a ' +
+                'trip is requested with GET /trips/:tripId',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
@@ -196,7 +198,7 @@ class Trip {
                     function replySuccess() {
                         reply({
                             message: 'ok',
-                            imageLocation
+                            imageLocation: imageLocation
                         });
                     }
 

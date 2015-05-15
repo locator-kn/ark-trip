@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "boom": "^2.7.1",
+    "gm": "^1.17.0",
     "joi": "^6.2.0",
     "locators-regex": "0.0.1",
     "sinon": "^1.14.1",
