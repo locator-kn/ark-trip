@@ -74,7 +74,7 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
   "accommodations":["couch"],
   "locations": [],
   "pics": [],
-  "category": ["halligallidrecksaufest", "grilsontour"],
+  "moods": ["halligallidrecksaufest", "grilsontour"],
   "type": "trip"
 }
 ```
@@ -102,7 +102,7 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
         "thumbnail":[
 
         ],
-        "category":"halli galli drecksaufest",
+        "moods":"halli galli drecksaufest",
         "type":"trip"
     },
     {
