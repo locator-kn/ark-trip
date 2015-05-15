@@ -60,7 +60,7 @@ class Search {
                                 moods_hit: 0
                             };
                             // split params to get all moods
-                            var moods = req.query.moods.split('_');
+                            var moods = req.query.moods.split('.');
                             // check if trip contains requried mood
                             moods.forEach(function (mood) {
                                 moods_relevance.moods_sum++;
