@@ -257,6 +257,101 @@ class Trip {
             }
         });
 
+        // create a picture of a trip
+        server.route({
+            method: 'POST',
+            path: '/trips/{tripid}/picture/more',
+            config: {
+                // TODO check auth
+                auth: false,
+                payload: {
+                    output: 'stream',
+                    parse: true,
+                    allow: 'multipart/form-data',
+                    // TODO: evaluate real value
+                    maxBytes: 1000000000000
+                },
+                handler: (request, reply) => {
+
+                    var ext = request.payload.file.hapi.headers['content-type']
+                        .match(this.regex.imageExtension);
+
+                    // get number of already saved images
+
+
+                    // file, which will be updated
+                    var filename = request.payload.nameOfTrip + '-trip.' + ext;
+                    var thumbname = request.payload.nameOfTrip + '-trip-thumb.' + ext;
+
+
+                    // "/i/" will be mapped to /api/vX/ from nginx
+                    var url = '/i/trips/' + request.params.tripid + '/' + filename;
+                    var thumbURL = '/i/trips/' + request.params.tripid + '/' + thumbname;
+
+                    var imageLocation = {
+                        picture: url,
+                        thumbnail: thumbURL
+                    };
+
+                    function replySuccess() {
+                        reply({
+                            message: 'ok',
+                            imageLocation
+                        });
+                    }
+
+                    // create a read stream and crop it
+                    var readStream = this.gm(request.payload.file)
+                        .crop(request.payload.width
+                        , request.payload.height
+                        , request.payload.xCoord
+                        , request.payload.yCoord)
+                        .resize(1500, 675) // TODO: needs to be discussed
+                        .stream();
+
+                    // create a read stream and crop it
+                    var thumbnailStream = this.gm(request.payload.file)
+                        .crop(request.payload.width
+                        , request.payload.height
+                        , request.payload.xCoord
+                        , request.payload.yCoord)
+                        .resize(120, 120) // TODO: needs to be discussed
+                        .stream();
+
+                    this.db.savePicture(request.params.tripid, filename, readStream)
+                        .then(() => {
+                            return this.db.savePicture(request.params.tripid, thumbname, thumbnailStream);
+                        })
+                        .then(replySuccess)
+                        .catch((err) => {
+                            return reply(this.boom.badRequest(err));
+                        });
+
+                },
+                description: 'Create one of many pictures of a particular trip',
+                notes: 'Will save a picture for this trip. Not the main picture.',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    },
+                    payload: {
+                        nameOfTrip: this.joi.string().required(),
+                        // validate file type to be an image
+                        file: this.imageSchema,
+                        // validate that a correct dimension object is emitted
+                        width: this.joi.number().integer().required(),
+                        height: this.joi.number().integer().required(),
+                        xCoord: this.joi.number().integer().required(),
+                        yCoord: this.joi.number().integer().required()
+
+
+                    }
+                }
+            }
+        });
+
         // update a  picture of a trip
         server.route({
             method: 'PUT',
