@@ -178,27 +178,7 @@ class Trip {
                     // TODO: evaluate real value
                     maxBytes: 1000000000000
                 },
-                handler: (request, reply) => {
-
-                    var file = this.getFileInformation(request);
-
-                    // create a read stream and crop it
-                    var readStream = this.crop(request, 1500, 675);
-                    var thumbnailStream = this.crop(request, 120, 120);
-
-                    this.db.savePicture(request.params.tripid, file.filename, readStream)
-                        .then(() => {
-                            return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
-                        })
-                        .then(() => {
-                            return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
-                        })
-                        .then(this.replySuccess(reply, file.imageLocation))
-                        .catch((err) => {
-                            return reply(this.boom.badRequest(err));
-                        });
-
-                },
+                handler: this.savePicture,
                 description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
