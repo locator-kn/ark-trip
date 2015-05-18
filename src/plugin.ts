@@ -258,7 +258,7 @@ class Trip {
                     this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
                         .catch((err) => {
                             return reply(this.boom.badRequest(err));
-                        }).then((value) => {
+                        }).then(() => {
                             this.savePicture(request, reply);
                         });
 
