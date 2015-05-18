@@ -13,6 +13,7 @@ class Trip {
     tripSchemaPost:any;
     tripSchemaPUT:any;
     imageSchema:any;
+    headerSchema:any;
     gm:any;
     regex:any;
     search:any;
@@ -70,7 +71,7 @@ class Trip {
 
         this.tripSchemaPost = trip;
         this.tripSchemaPUT = putMethodElements.concat(trip);
-        this.imageSchema = this.joi.object({
+        this.headerSchema = this.joi.object({
             hapi: {
                 headers: {
                     'content-type': this.joi.string()
@@ -79,7 +80,16 @@ class Trip {
                 }
             }
         }).options({allowUnknown: true}).required();
-
+        this.imageSchema = {
+            nameOfTrip: this.joi.string().required(),
+            // validate file type to be an image
+            file: this.headerSchema,
+            // validate that a correct dimension object is emitted
+            width: this.joi.number().integer().required(),
+            height: this.joi.number().integer().required(),
+            xCoord: this.joi.number().integer().required(),
+            yCoord: this.joi.number().integer().required()
+        }
     }
 
     register:IRegister = (server, options, next) => {
@@ -179,16 +189,7 @@ class Trip {
                         tripid: this.joi.string()
                             .required()
                     },
-                    payload: {
-                        nameOfTrip: this.joi.string().required(),
-                        // validate file type to be an image
-                        file: this.imageSchema,
-                        // validate that a correct dimension object is emitted
-                        width: this.joi.number().integer().required(),
-                        height: this.joi.number().integer().required(),
-                        xCoord: this.joi.number().integer().required(),
-                        yCoord: this.joi.number().integer().required()
-                    }
+                    payload: this.imageSchema
                 }
             }
         });
