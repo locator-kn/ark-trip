@@ -223,6 +223,21 @@ class Trip {
             }
         });
 
+        // create a new trip with form data
+        server.route({
+            method: 'POST',
+            path: '/trips/image',
+            config: {
+                handler: this.savePicture,
+                description: 'Creates a new trip with form data. Used when a picture is uploaded first',
+                tags: ['api', 'trip'],
+                validate: {
+                    payload: this.schema.imageSchemaPost
+                }
+            }
+
+        });
+
         // create the views for couchdb
         server.route({
             method: 'POST',
@@ -340,7 +355,9 @@ class Trip {
             }).then(() => {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
             })
-            .then(this.replySuccess(reply, file.imageLocation))
+            .then((value) => {
+                this.replySuccess(reply, file.imageLocation, value.id)
+            })
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
             });
@@ -387,10 +404,11 @@ class Trip {
      * @param reply
      * @param imageLocation
      */
-    private replySuccess = (reply, imageLocation) => {
+    private replySuccess = (reply, imageLocation, documentid) => {
         reply({
             message: 'ok',
-            imageLocation: imageLocation
+            imageLocation: imageLocation,
+            id: documentid
         });
     };
 
