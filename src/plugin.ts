@@ -196,8 +196,6 @@ class Trip {
                         height: this.joi.number().integer().required(),
                         xCoord: this.joi.number().integer().required(),
                         yCoord: this.joi.number().integer().required()
-
-
                     }
                 }
             }
@@ -261,23 +259,7 @@ class Trip {
                         .catch((err) => {
                             return reply(this.boom.badRequest(err));
                         }).then((value) => {
-
-                            var file = this.getFileInformation(request);
-
-                            var readStream = this.crop(request, 1500, 675);
-                            var thumbnailStream = this.crop(request, 120, 120);
-
-                            this.db.savePicture(request.params.tripid, file.filename, readStream)
-                                .then(() => {
-                                    return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
-                                })
-                                .then(() => {
-                                    return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
-                                })
-                                .then(this.replySuccess(reply, file.imageLocation))
-                                .catch((err) => {
-                                    return reply(this.boom.badRequest(err));
-                                });
+                            this.savePicture(request, reply);
                         });
 
                 },
