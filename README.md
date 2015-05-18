@@ -76,7 +76,8 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
   "locations": [],
   "pics": [],
   "moods": ["halligallidrecksaufest", "grilsontour"],
-  "status": true,
+  "activ": "true",
+  "delete": "false",
   "type": "trip"
 }
 ```
