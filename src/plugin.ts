@@ -370,14 +370,7 @@ class Trip {
             method: 'DELETE',
             path: '/trips/{tripid}',
             config: {
-                handler: (request, reply) => {
-                    this.db.deleteTripById(request.params.tripid, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
+                handler: this.deleteTripById,
                 description: 'delete a particular trip',
                 tags: ['api', 'trip'],
                 validate: {
@@ -483,6 +476,15 @@ class Trip {
 
     private getTripById = (request, reply) => {
         this.db.getTripById(request.params.tripid, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
+    private deleteTripById = (request, reply) => {
+        this.db.deleteTripById(request.params.tripid, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
