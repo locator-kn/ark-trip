@@ -127,7 +127,7 @@ class Trip {
                         tripid: this.joi.string()
                             .required()
                     },
-                    payload: this.schema.imageSchema
+                    payload: this.schema.imageSchemaPost
                 }
             }
         });
@@ -154,7 +154,7 @@ class Trip {
                         tripid: this.joi.string()
                             .required()
                     },
-                    payload: this.schema.imageSchema
+                    payload: this.schema.imageSchemaPost
                 }
             }
         });
@@ -181,7 +181,7 @@ class Trip {
                         tripid: this.joi.string()
                             .required()
                     },
-                    payload: this.schema.imageSchemaUpdate
+                    payload: this.schema.imageSchemaPut
                 }
             }
         });
