@@ -277,6 +277,12 @@ class Trip {
         return 'register';
     }
 
+    /**
+     * Function to get file information for a file, from a request.
+     *
+     * @param request
+     * @returns {{ext: string, filename: string, thumbname: string, url: string, thumbURL: string, imageLocation: {}}}
+     */
     private getFileInformation(request:any) {
         var file = {
             ext: '',
@@ -304,10 +310,14 @@ class Trip {
             thumbnail: file.thumbURL
         };
         return file;
-
-
     }
 
+    /**
+     * Save picture.
+     *
+     * @param request
+     * @param reply
+     */
     private savePicture = (request, reply) => {
 
         var file = this.getFileInformation(request);
@@ -330,8 +340,12 @@ class Trip {
 
     };
 
+    /**
+     * Function to update picture.
+     * @param request
+     * @param reply
+     */
     private updatePicture = (request, reply) => {
-
         // check first if entry exist in the database
         this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
             .catch((err) => {
@@ -342,6 +356,14 @@ class Trip {
 
     };
 
+    /**
+     * Crop a payload file and return a stream.
+     *
+     * @param request
+     * @param x
+     * @param y
+     * @returns {any}
+     */
     private crop(request, x, y) {
         return this.gm(request.payload.file)
             .crop(request.payload.width,
@@ -352,6 +374,12 @@ class Trip {
             .stream();
     }
 
+    /**
+     * reply a success message.
+     *
+     * @param reply
+     * @param imageLocation
+     */
     private replySuccess = (reply, imageLocation) => {
         reply({
             message: 'ok',
@@ -359,6 +387,12 @@ class Trip {
         });
     };
 
+    /**
+     * create a new Trip.
+     *
+     * @param request
+     * @param reply
+     */
     private createTrip = (request, reply) => {
         // TODO: read user id from session and create trip with this info
         this.db.createTrip(request.payload, (err, data) => {
@@ -369,6 +403,12 @@ class Trip {
         });
     };
 
+    /**
+     * Update a Trip.
+     *
+     * @param request
+     * @param reply
+     */
     private updateTrip = (request, reply) => {
         this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
             if (err) {
@@ -378,6 +418,13 @@ class Trip {
         });
     };
 
+    /**
+     * get all Trips in Database.
+     * TODO: limit number of returned trips.
+     *
+     * @param request
+     * @param reply
+     */
     private getTrips = (request, reply) => {
         this.db.getTrips((err, data) => {
             if (err) {
@@ -387,6 +434,12 @@ class Trip {
         });
     };
 
+    /**
+     * Get trip by id.
+     *
+     * @param request
+     * @param reply
+     */
     private getTripById = (request, reply) => {
         this.db.getTripById(request.params.tripid, (err, data) => {
             if (err) {
@@ -396,6 +449,12 @@ class Trip {
         });
     };
 
+    /**
+     * Delete Trip by id.
+     *
+     * @param request
+     * @param reply
+     */
     private deleteTripById = (request, reply) => {
         this.db.deleteTripById(request.params.tripid, (err, data) => {
             if (err) {
@@ -405,6 +464,12 @@ class Trip {
         });
     };
 
+    /**
+     * Create or update view with search functionality, locatoed in /util/search.
+     *
+     * @param request
+     * @param reply
+     */
     private createSearchView = (request, reply) => {
         this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
             if (err) {
@@ -415,6 +480,12 @@ class Trip {
         });
     };
 
+    /**
+     * Function to search trips in database. The search algo is located in util/search.
+     *
+     * @param request
+     * @param reply
+     */
     private searchTrips(request, reply) {
         // split by _ -> city.mood1.mood2.moodX
         var opts = request.params.opts.split(".");
