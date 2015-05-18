@@ -235,7 +235,19 @@ class Trip {
                     // TODO: evaluate real value
                     maxBytes: 1000000000000
                 },
-                handler: this.savePicture,
+                handler: (request, reply) => {
+                    // create an empty trip before uploading a picture
+                    this.db.createTrip({type: "preTrip"}, (err, data) => {
+                        if (err) {
+                            return reply(this.boom.wrap(err, 400));
+                        }
+                        // add the generated id from database to the request object
+                        request.params.tripid = data.id;
+
+                        // save picture to the just created document
+                        this.savePicture(request, reply, false);
+                    });
+                },
                 description: 'Creates a new trip with form data. Used when a picture is uploaded first',
                 tags: ['api', 'trip'],
                 validate: {
@@ -318,7 +330,7 @@ class Trip {
         file.ext = request.payload.file.hapi.headers['content-type']
             .match(this.schema.regex.imageExtension);
 
-        if(originalName){
+        if (originalName) {
             // file, which will be updated
             var _file = request.payload.nameOfFile.split('.')[0];
             file.filename = _file + '.' + file.ext;
