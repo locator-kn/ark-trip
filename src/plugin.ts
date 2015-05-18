@@ -253,7 +253,7 @@ class Trip {
                         .then(() => {
                             return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
                         })
-                        .then(this.replySuccess(reply, file.imageLocation)
+                        .then(this.replySuccess(reply, file.imageLocation))
                         .catch((err) => {
                             return reply(this.boom.badRequest(err));
                         });
