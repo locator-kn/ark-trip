@@ -336,7 +336,6 @@ class Trip {
                         .required()
                         .description('Trip JSON object')
                 }
-
             }
         });
 
@@ -364,14 +363,7 @@ class Trip {
             method: 'PUT',
             path: '/trips/{tripid}',
             config: {
-                handler: (request, reply) => {
-                    this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
+                handler: this.updateTrip,
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
                 validate: {
@@ -479,12 +471,21 @@ class Trip {
             .stream();
     }
 
-    private replySuccess(reply, imageLocation) {
+    private replySuccess = (reply, imageLocation) => {
         reply({
             message: 'ok',
             imageLocation: imageLocation
         });
-    }
+    };
+
+    private updateTrip = (request, reply) => {
+        this.db.updateTrip(request.payload._id, request.payload._rev, request.payload, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
 
     private searchTrips(request, reply) {
         // split by _ -> city.mood1.mood2.moodX
