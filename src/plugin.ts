@@ -300,7 +300,7 @@ class Trip {
                     function replySuccess() {
                         reply({
                             message: 'ok',
-                            imageLocation
+                            imageLocation: imageLocation
                         });
                     }
 
