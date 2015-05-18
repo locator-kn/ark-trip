@@ -181,7 +181,7 @@ class Trip {
                         tripid: this.joi.string()
                             .required()
                     },
-                    payload: this.schema.imageSchema
+                    payload: this.schema.imageSchemaUpdate
                 }
             }
         });

@@ -4,6 +4,8 @@ class Schema {
     public regex:any;
     public tripSchemaPost:any;
     public tripSchemaPUT:any;
+    public imageSchemaDefault:any;
+    public imageSchemaUpdate:any;
     public imageSchema:any;
     headerSchema:any;
 
@@ -60,8 +62,7 @@ class Schema {
                 }
             }
         }).options({allowUnknown: true}).required();
-        this.imageSchema = {
-            nameOfTrip: this.joi.string().required(),
+        this.imageSchemaDefault = {
             // validate file type to be an image
             file: this.headerSchema,
             // validate that a correct dimension object is emitted
@@ -69,7 +70,12 @@ class Schema {
             height: this.joi.number().integer().required(),
             xCoord: this.joi.number().integer().required(),
             yCoord: this.joi.number().integer().required()
-        }
+        };
+        this.imageSchema = this.imageSchemaDefault;
+        this.imageSchema.nameOfTrip = this.joi.string().required();
+        this.imageSchemaUpdate = this.imageSchemaDefault;
+        this.imageSchemaUpdate.nameOfFile = this.joi.string().min(1).required();
+
     }
 
 }
