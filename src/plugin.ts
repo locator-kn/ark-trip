@@ -293,14 +293,14 @@ class Trip {
             imageLocation: {}
         };
 
-        file.ext = request.payloadfile.hapi.headers['content-type']
+        file.ext = request.payload.file.hapi.headers['content-type']
             .match(this.schema.regex.imageExtension);
 
         if(originalName){
             // file, which will be updated
-            var file = request.payload.nameOfFile.split('.')[0];
-            file.filename = file + '.' + file.ext;
-            file.thumbname = file + '-thumb.' + file.ext;
+            var _file = request.payload.nameOfFile.split('.')[0];
+            file.filename = _file + '.' + file.ext;
+            file.thumbname = _file + '-thumb.' + file.ext;
         } else {
             // file, which will be updated
             file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;

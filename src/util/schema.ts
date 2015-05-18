@@ -4,14 +4,15 @@ class Schema {
     public regex:any;
     public tripSchemaPost:any;
     public tripSchemaPUT:any;
-    public imageSchemaDefault:any;
-    public imageSchemaUpdate:any;
-    public imageSchema:any;
-    headerSchema:any;
+    public imageSchemaPost:any;
+    public imageSchemaPut:any;
+    basicImageSchema:any;
+    private hoek:any;
 
     constructor() {
         this.joi = require('joi');
         this.regex = require('locators-regex');
+        this.hoek = require('hoek');
 
         this.initSchemas();
     }
@@ -53,29 +54,31 @@ class Schema {
 
         this.tripSchemaPost = trip;
         this.tripSchemaPUT = putMethodElements.concat(trip);
-        this.headerSchema = this.joi.object({
-            hapi: {
-                headers: {
-                    'content-type': this.joi.string()
-                        .regex(this.regex.imageContentType)
-                        .required()
-                }
-            }
-        }).options({allowUnknown: true}).required();
-        this.imageSchemaDefault = {
+
+        // images validation
+        this.basicImageSchema = {
             // validate file type to be an image
-            file: this.headerSchema,
+            file: this.joi.object({
+                hapi: {
+                    headers: {
+                        'content-type': this.joi.string()
+                            .regex(this.regex.imageContentType)
+                            .required()
+                    }
+                }
+            }).options({allowUnknown: true}).required(),
             // validate that a correct dimension object is emitted
             width: this.joi.number().integer().required(),
             height: this.joi.number().integer().required(),
             xCoord: this.joi.number().integer().required(),
             yCoord: this.joi.number().integer().required()
         };
-        this.imageSchema = this.imageSchemaDefault;
-        this.imageSchema.nameOfTrip = this.joi.string().required();
-        this.imageSchemaUpdate = this.imageSchemaDefault;
-        this.imageSchemaUpdate.nameOfFile = this.joi.string().min(1).required();
 
+        this.imageSchemaPost = this.hoek.clone(this.basicImageSchema);
+        this.imageSchemaPost.nameOfTrip = this.joi.string().required();
+
+        this.imageSchemaPut = this.hoek.clone(this.basicImageSchema);
+        this.imageSchemaPut.nameOfFile = this.joi.string().min(1).required();
     }
 
 }
