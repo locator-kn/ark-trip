@@ -286,14 +286,7 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 auth: false,
-                handler: (request, reply) => {
-                    this.db.getTripById(request.params.tripid, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
+                handler: this.getTripById,
                 description: 'Get particular trip by id',
                 notes: 'sample call: /trips/1222123132',
                 tags: ['api', 'trip'],
@@ -488,6 +481,14 @@ class Trip {
         });
     };
 
+    private getTripById = (request, reply) => {
+        this.db.getTripById(request.params.tripid, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
 
     private searchTrips(request, reply) {
         // split by _ -> city.mood1.mood2.moodX
