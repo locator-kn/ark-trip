@@ -102,9 +102,7 @@ class Trip {
             path: '/trips/search/{opts}',
             config: {
                 auth: false,
-                handler: (request, reply) => {
-                    this.searchTrips(request, reply);
-                },
+                handler: this.searchTrips,
                 description: 'Search for trips',
                 notes: 'Search functionality  is not supported with swagger',
                 tags: ['api', 'trip'],
