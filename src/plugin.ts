@@ -184,13 +184,6 @@ class Trip {
 
                     var file = this.getFileInformation(request);
 
-                    function replySuccess() {
-                        reply({
-                            message: 'ok',
-                            imageLocation: file.imageLocation
-                        });
-                    }
-
                     // create a read stream and crop it
                     var readStream = this.crop(request, 1500, 675);
                     var thumbnailStream = this.crop(request, 120, 120);
@@ -202,7 +195,7 @@ class Trip {
                         .then(() => {
                             return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
                         })
-                        .then(replySuccess)
+                        .then(this.replySuccess(reply, file.imageLocation))
                         .catch((err) => {
                             return reply(this.boom.badRequest(err));
                         });
@@ -250,12 +243,6 @@ class Trip {
 
                     var file = this.getFileInformation(request);
 
-                    function replySuccess() {
-                        reply({
-                            message: 'ok',
-                            imageLocation: file.imageLocation
-                        });
-                    }
 
                     // create a read stream and crop it
                     // TODO: size needs to be discussed
@@ -266,7 +253,7 @@ class Trip {
                         .then(() => {
                             return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
                         })
-                        .then(replySuccess)
+                        .then(this.replySuccess(reply, file.imageLocation)
                         .catch((err) => {
                             return reply(this.boom.badRequest(err));
                         });
@@ -320,13 +307,6 @@ class Trip {
 
                             var file = this.getFileInformation(request);
 
-                            function replySuccess() {
-                                reply({
-                                    message: 'ok',
-                                    imageLocation: file.imageLocation
-                                });
-                            }
-
                             var readStream = this.crop(request, 1500, 675);
                             var thumbnailStream = this.crop(request, 120, 120);
 
@@ -337,7 +317,7 @@ class Trip {
                                 .then(() => {
                                     return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
                                 })
-                                .then(replySuccess)
+                                .then(this.replySuccess(reply, file.imageLocation))
                                 .catch((err) => {
                                     return reply(this.boom.badRequest(err));
                                 });
@@ -536,6 +516,13 @@ class Trip {
             , request.payload.yCoord)
             .resize(x, y)
             .stream();
+    }
+
+    private replySuccess(reply, imageLocation) {
+        reply({
+            message: 'ok',
+            imageLocation: imageLocation
+        });
     }
 
     private searchTrips(request, reply) {
