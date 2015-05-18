@@ -64,46 +64,31 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
   "title": "my trip",
   "userid": "adsf5as87f57a65f7a6578asdf57865",
   "description": "bla bla bla",
-  "postcode": "78467",
-  "city": "constance",
+  "description_money": "Du solltest so X Geld mitbringen ..., für ..."
+  "city_query": "konstanz",
+  "city": "Konstanz",
   "start_date": "2015-04-20T00:00:00.000Z",
   "end_date": "2015-04-23T00:00:00.000Z",
   "duration": "2",
   "persons": "3",
-  "budget": 100,
-  "accommodations":["couch"],
+  "accommodation": "true",
+  "accommodation_equipment" : ["shower", "breakfast", "tv"],
   "locations": [],
   "pics": [],
   "moods": ["halligallidrecksaufest", "grilsontour"],
+  "status": true,
   "type": "trip"
 }
 ```
 
-##### Multiple Trips, filtered by arguments - GET /trips
+##### Multiple Trips, filtered by arguments - GET /trips/search/{city.moods}/?...
 (whats the difference? We should provide a thumbnail in the trip overview, not an array of big size pics)
 ```
 [
     {
-        "_id":"1849ef313fbc39f078084f9168000e16",
-        "_rev":"4-c726329a4e810962443ce5a7a176b00c",
-        "title":"my trip",
-        "userid":"q713718364ef97s6ds8f",
-        "local": "42312312",
-        "description":"bla bla bla",
-        "postcode": "78467",
-        "city":"constance",
-        "start_date":"2015-04-20T00:00:00.000Z",
-        "end_date":"2015-04-23T00:00:00.000Z",
-        "days": "2",
-        "budget":100,
-        "locations":[
-
-        ],
-        "thumbnail":[
-
-        ],
-        "moods":"halli galli drecksaufest",
-        "type":"trip"
+        ...
+        "thumbnail":[...],
+        ...
     },
     {
        ...
