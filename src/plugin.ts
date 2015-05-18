@@ -51,7 +51,6 @@ class Trip {
                 place_id: this.joi.string().required(),
                 id: this.joi.string().required()
             }),
-            city_id: this.joi.string().required(),
             start_date: this.joi.date(),
             end_date: this.joi.date(),
             accommodation: this.joi.boolean(),
