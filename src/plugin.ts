@@ -321,15 +321,7 @@ class Trip {
             method: 'POST',
             path: '/trips/setup',
             config: {
-                handler: (request, reply) => {
-                    this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        } else {
-                            reply(msg);
-                        }
-                    });
-                },
+                handler: this.createSearchView,
                 description: 'Setup all views and lists for couchdb',
                 tags: ['api', 'trip']
             }
@@ -491,6 +483,16 @@ class Trip {
                 return reply(this.boom.wrap(err, 400));
             }
             reply(data);
+        });
+    };
+
+    private createSearchView = (request, reply) => {
+        this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            } else {
+                reply(msg);
+            }
         });
     };
 
