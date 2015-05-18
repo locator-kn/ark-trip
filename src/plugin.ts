@@ -207,22 +207,8 @@ class Trip {
                     }
 
                     // create a read stream and crop it
-                    var readStream = this.gm(request.payload.file)
-                        .crop(request.payload.width
-                        , request.payload.height
-                        , request.payload.xCoord
-                        , request.payload.yCoord)
-                        .resize(1500, 675) // TODO: needs to be discussed
-                        .stream();
-
-                    // create a read stream and crop it
-                    var thumbnailStream = this.gm(request.payload.file)
-                        .crop(request.payload.width
-                        , request.payload.height
-                        , request.payload.xCoord
-                        , request.payload.yCoord)
-                        .resize(120, 120) // TODO: needs to be discussed
-                        .stream();
+                    var readStream = this.crop(request, 1500, 675);
+                    var thumbnailStream = this.crop(request, 120, 120);
 
                     this.db.savePicture(request.params.tripid, filename, readStream)
                         .then(() => {
