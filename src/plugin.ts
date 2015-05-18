@@ -46,7 +46,11 @@ class Trip {
             userid: this.joi.string().optional(),
             description: this.joi.string().required(),
             description_money: this.joi.string(),
-            city: this.joi.string().required(),
+            city: this.joi.object().keys({
+                title: this.joi.string().required(),
+                place_id: this.joi.string().required(),
+                id: this.joi.string().required()
+            }),
             city_id: this.joi.string().required(),
             start_date: this.joi.date(),
             end_date: this.joi.date(),
