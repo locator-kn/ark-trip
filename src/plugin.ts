@@ -20,8 +20,7 @@ class Trip {
 
     constructor() {
         this.register.attributes = {
-            name: 'ark-trip',
-            version: '0.1.0'
+            pkg: require('./../../package.json')
         };
 
         this.boom = require('boom');
