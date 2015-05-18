@@ -45,14 +45,18 @@ class Trip {
             // read form session
             userid: this.joi.string().optional(),
             description: this.joi.string().required(),
+            description_money: this.joi.string(),
             city: this.joi.string().required(),
+            city_id: this.joi.string().required(),
             start_date: this.joi.date(),
             end_date: this.joi.date(),
-            budget: this.joi.number(),
-            overnight: this.joi.number(),
-            moods: this.joi.string(),
+            accommodation: this.joi.boolean(),
+            accommodation_equipment: this.joi.array(),
+            moods: this.joi.array(),
             locations: this.joi.array(),
             pics: this.joi.array(),
+            active: this.joi.boolean(),
+            delete: this.joi.boolean(),
             type: this.joi.string().required().valid('trip')
         });
 
