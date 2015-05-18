@@ -125,7 +125,6 @@ class Trip {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
                         }
-                        // TODO: limit dataaaa
                         reply(data);
                     });
                 },
@@ -139,7 +138,6 @@ class Trip {
             method: 'GET',
             path: '/trips/{tripid}/{name}.{ext}',
             config: {
-                // TODO: check auth
                 auth: false,
                 handler: (request, reply) => {
                     // create file name
@@ -172,7 +170,6 @@ class Trip {
             method: ['PUT', 'POST'],
             path: '/trips/{tripid}/picture',
             config: {
-                // TODO check auth
                 auth: false,
                 payload: {
                     output: 'stream',
@@ -231,7 +228,6 @@ class Trip {
             method: 'POST',
             path: '/trips/{tripid}/picture/more',
             config: {
-                // TODO check auth
                 auth: false,
                 payload: {
                     output: 'stream',
@@ -270,7 +266,6 @@ class Trip {
             method: 'PUT',
             path: '/trips/{tripid}/picture/more',
             config: {
-                // TODO check auth
                 auth: false,
                 payload: {
                     output: 'stream',
