@@ -248,30 +248,12 @@ class Trip {
                 },
                 handler: (request, reply) => {
 
-                    var ext = request.payload.file.hapi.headers['content-type']
-                        .match(this.regex.imageExtension);
-
-                    // get number of already saved images
-
-
-                    // file, which will be updated
-                    var filename = request.payload.nameOfTrip + '-trip.' + ext;
-                    var thumbname = request.payload.nameOfTrip + '-trip-thumb.' + ext;
-
-
-                    // "/i/" will be mapped to /api/vX/ from nginx
-                    var url = '/i/trips/' + request.params.tripid + '/' + filename;
-                    var thumbURL = '/i/trips/' + request.params.tripid + '/' + thumbname;
-
-                    var imageLocation = {
-                        picture: url,
-                        thumbnail: thumbURL
-                    };
+                    var file = this.getFileInformation(request);
 
                     function replySuccess() {
                         reply({
                             message: 'ok',
-                            imageLocation: imageLocation
+                            imageLocation: file.imageLocation
                         });
                     }
 
@@ -280,9 +262,9 @@ class Trip {
                     var readStream = this.crop(request, 1500, 675);
                     var thumbnailStream = this.crop(request, 120, 120);
 
-                    this.db.savePicture(request.params.tripid, filename, readStream)
+                    this.db.savePicture(request.params.tripid, file.filename, readStream)
                         .then(() => {
-                            return this.db.savePicture(request.params.tripid, thumbname, thumbnailStream);
+                            return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
                         })
                         .then(replySuccess)
                         .catch((err) => {
