@@ -172,17 +172,7 @@ class Trip {
                     // TODO: evaluate real value
                     maxBytes: 1000000000000
                 },
-                handler: (request, reply) => {
-
-                    // check first if entry exist in the database
-                    this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
-                        .catch((err) => {
-                            return reply(this.boom.badRequest(err));
-                        }).then(() => {
-                            this.savePicture(request, reply);
-                        });
-
-                },
+                handler: this.updatePicture,
                 description: 'Update/Change one of the pictures of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
@@ -336,6 +326,18 @@ class Trip {
             .then(this.replySuccess(reply, file.imageLocation))
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
+            });
+
+    };
+
+    private updatePicture = (request, reply) => {
+
+        // check first if entry exist in the database
+        this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
+            .catch((err) => {
+                return reply(this.boom.badRequest(err));
+            }).then(() => {
+                this.savePicture(request, reply);
             });
 
     };
