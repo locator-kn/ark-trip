@@ -243,7 +243,6 @@ class Trip {
 
                     var file = this.getFileInformation(request);
 
-
                     // create a read stream and crop it
                     // TODO: size needs to be discussed
                     var readStream = this.crop(request, 1500, 675);
@@ -252,6 +251,8 @@ class Trip {
                     this.db.savePicture(request.params.tripid, file.filename, readStream)
                         .then(() => {
                             return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
+                        }).then(() => {
+                            return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
                         })
                         .then(this.replySuccess(reply, file.imageLocation))
                         .catch((err) => {
