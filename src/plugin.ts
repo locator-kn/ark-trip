@@ -182,27 +182,12 @@ class Trip {
                 },
                 handler: (request, reply) => {
 
-                    var ext = request.payload.file.hapi.headers['content-type']
-                        .match(this.regex.imageExtension);
-
-                    // file, which will be updated
-                    var filename = request.payload.nameOfTrip + '-trip.' + ext;
-                    var thumbname = request.payload.nameOfTrip + '-trip-thumb.' + ext;
-
-
-                    // "/i/" will be mapped to /api/vX/ from nginx
-                    var url = '/i/trips/' + request.params.tripid + '/' + filename;
-                    var thumbURL = '/i/trips/' + request.params.tripid + '/' + thumbname;
-
-                    var imageLocation = {
-                        picture: url,
-                        thumbnail: thumbURL
-                    };
+                    var file = this.getFileInformation(request);
 
                     function replySuccess() {
                         reply({
                             message: 'ok',
-                            imageLocation: imageLocation
+                            imageLocation: file.imageLocation
                         });
                     }
 
@@ -210,12 +195,12 @@ class Trip {
                     var readStream = this.crop(request, 1500, 675);
                     var thumbnailStream = this.crop(request, 120, 120);
 
-                    this.db.savePicture(request.params.tripid, filename, readStream)
+                    this.db.savePicture(request.params.tripid, file.filename, readStream)
                         .then(() => {
-                            return this.db.savePicture(request.params.tripid, thumbname, thumbnailStream);
+                            return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
                         })
                         .then(() => {
-                            return this.db.updateDocument(request.params.tripid, {images: imageLocation});
+                            return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
                         })
                         .then(replySuccess)
                         .catch((err) => {
@@ -558,6 +543,37 @@ class Trip {
 
         // Register
         return 'register';
+    }
+
+    private getFileInformation(request:any) {
+        var file = {
+            ext: '',
+            filename: '',
+            thumbname: '',
+            url: '',
+            thumbURL: '',
+            imageLocation: {}
+        };
+
+        file.ext = request.payloadfile.hapi.headers['content-type']
+            .match(this.regex.imageExtension);
+
+        // file, which will be updated
+        file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;
+        file.thumbname = request.payload.nameOfTrip + '-trip-thumb.' + file.ext;
+
+
+        // "/i/" will be mapped to /api/vX/ from nginx
+        file.url = '/i/trips/' + request.params.tripid + '/' + file.filename;
+        file.thumbURL = '/i/trips/' + request.params.tripid + '/' + file.thumbname;
+
+        file.imageLocation = {
+            picture: file.url,
+            thumbnail: file.thumbURL
+        };
+        return file;
+
+
     }
 
     private crop(request, x, y) {
