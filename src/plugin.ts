@@ -283,7 +283,7 @@ class Trip {
      * @param request
      * @returns {{ext: string, filename: string, thumbname: string, url: string, thumbURL: string, imageLocation: {}}}
      */
-    private getFileInformation(request:any) {
+    private getFileInformation(request:any, originalName) {
         var file = {
             ext: '',
             filename: '',
@@ -296,9 +296,16 @@ class Trip {
         file.ext = request.payloadfile.hapi.headers['content-type']
             .match(this.schema.regex.imageExtension);
 
-        // file, which will be updated
-        file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;
-        file.thumbname = request.payload.nameOfTrip + '-trip-thumb.' + file.ext;
+        if(originalName){
+            // file, which will be updated
+            var file = request.payload.nameOfFile.split('.')[0];
+            file.filename = file + '.' + file.ext;
+            file.thumbname = file + '-thumb.' + file.ext;
+        } else {
+            // file, which will be updated
+            file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;
+            file.thumbname = request.payload.nameOfTrip + '-trip-thumb.' + file.ext;
+        }
 
 
         // "/i/" will be mapped to /api/vX/ from nginx
@@ -318,9 +325,9 @@ class Trip {
      * @param request
      * @param reply
      */
-    private savePicture = (request, reply) => {
+    private savePicture = (request, reply, originalName) => {
 
-        var file = this.getFileInformation(request);
+        var file = this.getFileInformation(request, originalName);
 
         // create a read stream and crop it
         // TODO: size needs to be discussed
@@ -351,7 +358,7 @@ class Trip {
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
             }).then(() => {
-                this.savePicture(request, reply);
+                this.savePicture(request, reply, true);
             });
 
     };
