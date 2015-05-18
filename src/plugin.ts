@@ -228,6 +228,13 @@ class Trip {
             method: 'POST',
             path: '/trips/image',
             config: {
+                payload: {
+                    output: 'stream',
+                    parse: true,
+                    allow: 'multipart/form-data',
+                    // TODO: evaluate real value
+                    maxBytes: 1000000000000
+                },
                 handler: this.savePicture,
                 description: 'Creates a new trip with form data. Used when a picture is uploaded first',
                 tags: ['api', 'trip'],
