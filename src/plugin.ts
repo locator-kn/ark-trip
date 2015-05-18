@@ -119,14 +119,7 @@ class Trip {
             path: '/trips',
             config: {
                 auth: false,
-                handler: (request, reply) => {
-                    this.db.getTrips((err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
+                handler: this.getTrips,
                 description: 'Get all trips',
                 tags: ['api', 'trip']
             }
@@ -485,6 +478,16 @@ class Trip {
             reply(data);
         });
     };
+
+    private getTrips = (request, reply) => {
+        this.db.getTrips((err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
 
     private searchTrips(request, reply) {
         // split by _ -> city.mood1.mood2.moodX
