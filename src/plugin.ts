@@ -318,39 +318,24 @@ class Trip {
                             return reply(this.boom.badRequest(err));
                         }).then((value) => {
 
-                            var ext = request.payload.file.hapi.headers['content-type']
-                                .match(this.regex.imageExtension);
-
-                            // file, which will be updated
-                            var file = request.payload.nameOfFile.split('.')[0];
-                            var filename = file + '.' + ext;
-                            var thumbname = file + '-thumb.' + ext;
-
-                            // "/i/" will be mapped to /api/vX/ from nginx
-                            var url = '/i/trips/' + request.params.tripid + '/' + filename;
-                            var thumbURL = '/i/trips/' + request.params.tripid + '/' + thumbname;
-
-                            var imageLocation = {
-                                picture: url,
-                                thumbnail: thumbURL
-                            };
+                            var file = this.getFileInformation(request);
 
                             function replySuccess() {
                                 reply({
                                     message: 'ok',
-                                    imageLocation: imageLocation
+                                    imageLocation: file.imageLocation
                                 });
                             }
 
                             var readStream = this.crop(request, 1500, 675);
                             var thumbnailStream = this.crop(request, 120, 120);
 
-                            this.db.savePicture(request.params.tripid, filename, readStream)
+                            this.db.savePicture(request.params.tripid, file.filename, readStream)
                                 .then(() => {
-                                    return this.db.savePicture(request.params.tripid, thumbname, thumbnailStream);
+                                    return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
                                 })
                                 .then(() => {
-                                    return this.db.updateDocument(request.params.tripid, {images: imageLocation});
+                                    return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
                                 })
                                 .then(replySuccess)
                                 .catch((err) => {
