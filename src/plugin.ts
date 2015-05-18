@@ -305,15 +305,7 @@ class Trip {
             method: 'POST',
             path: '/trips',
             config: {
-                handler: (request, reply) => {
-                    // TODO: read user id from session and create trip with this info
-                    this.db.createTrip(request.payload, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        reply(data);
-                    });
-                },
+                handler: this.createTrip,
                 description: 'Create new trip',
                 tags: ['api', 'trip'],
                 validate: {
@@ -453,6 +445,16 @@ class Trip {
         reply({
             message: 'ok',
             imageLocation: imageLocation
+        });
+    };
+
+    private createTrip = (request, reply) => {
+        // TODO: read user id from session and create trip with this info
+        this.db.createTrip(request.payload, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
         });
     };
 
