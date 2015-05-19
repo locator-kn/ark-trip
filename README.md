@@ -6,6 +6,7 @@
 - POST to /trips/setup
 ## Search
 #### parameters
+
 |Parameter| optional / required | info |
 |---|---|---|
 |city| required | /trips/search/**city**|
