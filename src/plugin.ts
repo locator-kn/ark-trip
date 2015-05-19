@@ -541,10 +541,8 @@ class Trip {
             moods: (opts.join('.') || ""),
             start_date: (request.query.start_date || ""),
             end_date: (request.query.end_date || ""),
-            budget: (request.query.budget || ""),
             persons: (request.query.persons || ""),
-            days: (request.query.days || ""),
-            accommodations: (request.query.accommodations || "")
+            days: (request.query.days || "")
         };
         this.db.searchTripsByQuery(query, (err, data)=> {
             if (err) {
