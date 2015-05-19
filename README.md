@@ -1,5 +1,36 @@
 # Trip
 
+
+### How to use plugin
+## Setup
+- POST to /trips/setup
+## Search
+#### parameters
+|Parameter| optional / required | info |
+|---|---|---|
+|city| required | /trips/search/**city**|
+|mood| optional | /trips/search/**.mood1.mood2.mood3**|
+|city/mood| required| /trips/search/**cityid.mood1.mood2**|
+|checkin/checkout| optional | /trips/search/cityid.mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z** - if committed, use db query to get only trips between checkin and checkout|
+|days|optional|/trips/search/cityid.mood1/**?days=2**|
+|persons|optional|/trips/search/cityid.mood1/**?persons=3**|
+
+start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
+
+#### result relevance
+|parameter|relevance|
+|---|---|
+|moods|0.5/(number of moods)|
+|days|0.3|
+|persons|0.2|
+|**SUM:**|**1.0**|
+
+#### example call
+**/trips/search/58433437e7710a957cd798b0774a79385389035b.buddytrip.mood2.mood3?budget=100start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z&persons=3** 
+
+!!! Wichtig: Wenn nicht alle parameter übermittelt werden, soll die Summe aller Parameter trotzdem 1 sein! (Übereinstimmungen / Summe der übermittelten Parameter) 
+
+
 ### Routes
 ####GET
 
@@ -28,32 +59,6 @@
 |Ressource   | Description  |  on Success | on Failure |
 |---|---|---|---|
 |/trips/:tripID   | delete particular trip by id  | statusCode: 200 | statusCode: 404 |
-
-### Search
-#### parameters
-|Parameter| optional / required | info |
-|---|---|---|
-|city| required | /trips/search/**city**|
-|mood| optional | /trips/search/**_mood1_mood2_mood3**|
-|city/mood| required| /trips/search/**city_mood1_mood2**|
-|checkin/checkout| optional | /trips/search/city_mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z** - if committed, use db query to get only trips between checkin and checkout|
-|days|optional|/trips/search/city_mood1/**?days=2**|
-|persons|optional|/trips/search/city_mood1/**?persons=3**|
-|budget|optional|/trips/search/city_mood1/**?budget=56**|
-
-start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
-
-#### result relevance
-|parameter|relevance|
-|---|---|
-|moods|0.4/(number of moods)|
-|budget|0.1|
-|persons|0.2|
-|days|0.2|
-|accommodations|0.1|
-|**SUM:**|**1.0**|
-
-!!! Wichtig: Wenn nicht alle parameter übermittelt werden, soll die Summe aller Parameter trotzdem 1 sein! (Übereinstimmungen / Summe der übermittelten Parameter) 
 
 ### Dummy Json Results
 ##### Specific Trip - GET /trips/:tripID
