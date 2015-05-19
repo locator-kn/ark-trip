@@ -4,6 +4,7 @@
 ### How to use plugin
 ## Setup
 - POST to /trips/setup
+
 ## Search
 #### parameters
 
