@@ -84,7 +84,7 @@ class Search {
                             }
                             if (req.query.persons) {
                                 possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_PERSONS;
-                                if (req.query.persons <= row.value.budget) {
+                                if (req.query.persons <= row.value.persons) {
                                     relevance.persons = RELEVANCE_CONFIG.RELEVANCE_PERSONS;
                                 }
                             }
