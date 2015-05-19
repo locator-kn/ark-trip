@@ -1,7 +1,7 @@
 # Trip
 
 
-### How to use plugin
+### How to use
 ## Setup
 - POST to /trips/setup
 
