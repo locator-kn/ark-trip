@@ -41,6 +41,7 @@ class Schema {
             moods: this.joi.array(),
             locations: this.joi.array(),
             pics: this.joi.array(),
+            persons: this.joi.number().integer(),
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false),
             type: this.joi.string().required().valid('trip')
