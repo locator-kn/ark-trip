@@ -27,27 +27,23 @@ class Search {
             searchlist: function (head, req) {
                 var RELEVANCE_CONFIG = {
                     RELEVANCE_SUM: 1,
-                    RELEVANCE_MOODS: 0.4,
-                    RELEVANCE_DAYS: 0.2,
-                    RELEVANCE_PERSONS: 0.2,
-                    RELEVANCE_BUDGET: 0.1,
-                    RELEVANCE_ACCOMMODATIONS: 0.1
+                    RELEVANCE_MOODS: 0.5,
+                    RELEVANCE_DAYS: 0.3,
+                    RELEVANCE_PERSONS: 0.2
                 };
                 var row;
                 var result = [];
                 var queryParams = JSON.stringify(req.query);
                 while (row = getRow()) {
                     // city param is required
-                    if (queryParams != '{}' && (row.key == req.query.city)) {
+                    if (queryParams != '{}' && (row.key.id == req.query.city)) {
                         var moods_relevance;
                         var possibleRelevance = 0;
                         // status object for relevance check
                         var relevance = {
                             moods: 0,
-                            budget: 0,
                             persons: 0,
-                            days: 0,
-                            accommodations: 0
+                            days: 0
                         };
                         // set 'toPush' variable true and set it only false, if required param like mood don't hit
                         var toPush = true;
@@ -86,28 +82,16 @@ class Search {
                                 possibleRelevance = RELEVANCE_CONFIG.RELEVANCE_MOODS;
                                 relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS / moods_relevance.moods_sum * moods_relevance.moods_hit;
                             }
-                            if (req.query.budget) {
-                                possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_BUDGET;
-                                if (req.query.budget <= row.value.budget) {
-                                    relevance.budget = RELEVANCE_CONFIG.RELEVANCE_BUDGET;
-                                }
-                            }
                             if (req.query.persons) {
                                 possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_PERSONS;
                                 if (req.query.persons <= row.value.budget) {
-                                    relevance.persons = RELEVANCE_CONFIG.RELEVANCE_BUDGET;
+                                    relevance.persons = RELEVANCE_CONFIG.RELEVANCE_PERSONS;
                                 }
                             }
                             if (req.query.days) {
                                 possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_DAYS;
                                 if (req.query.days <= row.value.days) {
                                     relevance.days = RELEVANCE_CONFIG.RELEVANCE_DAYS;
-                                }
-                            }
-                            if (req.query.accommodations) {
-                                possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_ACCOMMODATIONS;
-                                if (req.query.accommodations <= row.value.accommodations) {
-                                    relevance.accommodations = RELEVANCE_CONFIG.RELEVANCE_ACCOMMODATIONS;
                                 }
                             }
 
