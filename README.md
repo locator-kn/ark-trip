@@ -70,8 +70,11 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
   "userid": "adsf5as87f57a65f7a6578asdf57865",
   "description": "bla bla bla",
   "description_money": "Du solltest so X Geld mitbringen ..., für ..."
-  "city_id": "2314h12jh4132lökjöl21k4hlö12kj1234",
-  "city": "Konstanz",
+  "city": {
+    "id": "58433437e7710a957cd798b0774a79385389035b",
+    "title": "Konstanz",
+    "place_id": "ChIJWx8MOBv2mkcR0JnfpbdrHwQ"
+  },
   "start_date": "2015-04-20T00:00:00.000Z",
   "end_date": "2015-04-23T00:00:00.000Z",
   "duration": "2",
