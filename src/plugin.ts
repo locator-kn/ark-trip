@@ -363,14 +363,20 @@ class Trip {
 
         var file = this.getFileInformation(request, originalName);
 
+        var attachmentData = {
+            'Content-Type': request.payload.file.hapi.headers['content-type'],
+            name: file.filename
+        };
+
         // create a read stream and crop it
         // TODO: size needs to be discussed
         var readStream = this.crop(request, 1500, 675);
         var thumbnailStream = this.crop(request, 120, 120);
 
-        this.db.savePicture(request.params.tripid, file.filename, readStream)
+        this.db.savePicture(request.params.tripid, attachmentData, readStream)
             .then(() => {
-                return this.db.savePicture(request.params.tripid, file.thumbname, thumbnailStream);
+                attachmentData.name = file.thumbname;
+                return this.db.savePicture(request.params.tripid, attachmentData, thumbnailStream);
             }).then(() => {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
             })
