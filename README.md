@@ -13,7 +13,7 @@
 |city| required | /trips/search/**city**|
 |mood| optional | /trips/search/**.mood1.mood2.mood3**|
 |city/mood| required| /trips/search/**cityid.mood1.mood2**|
-|checkin/checkout| optional | /trips/search/cityid.mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z** - if committed, use db query to get only trips between checkin and checkout|
+|checkin/checkout| optional | /trips/search/cityid.mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z**|
 |days|optional|/trips/search/cityid.mood1/**?days=2**|
 |persons|optional|/trips/search/cityid.mood1/**?persons=3**|
 
