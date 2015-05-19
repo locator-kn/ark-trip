@@ -17,7 +17,8 @@ class Search {
         views: {
             city: {
                 "map": function (doc) {
-                    if (doc.type == 'trip') {
+                    // include only active trips in search
+                    if (doc.type == 'trip' && doc.active == true) {
                         emit(doc.city, doc);
                     }
                 }
