@@ -8,7 +8,7 @@
 |/trips   | return all trips | json object | statusCode: 404 | 
 |/trips/:tripID   |  return a particular trip by id | json object | statusCode: 404 | 
 |/trips/search/*(see below)   | search for a trip | json object with all matches | statusCode: 404 |
-*/trips/search/konstanz.mood1.mood2.mood3?budget=100start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z&persons=3 
+*/trips/search/58433437e7710a957cd798b0774a79385389035b.buddytrip.mood2.mood3?budget=100start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z&persons=3 
 !!before '?' no '/' (at the moment..)"
 
 
