@@ -60,7 +60,7 @@ class Search {
                             // check if trip contains requried mood
                             moods.forEach(function (mood) {
                                 moods_relevance.moods_sum++;
-                                if (row.value.category.indexOf(mood) > -1) {
+                                if (row.value.moods.indexOf(mood) > -1) {
                                     toPush = true;
                                     moods_relevance.moods_hit++;
                                 }
