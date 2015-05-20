@@ -381,7 +381,7 @@ class Trip {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
             })
             .then((value) => {
-                this.replySuccess(reply, file.imageLocation, value.id)
+                this.replySuccess(reply, file.imageLocation, value)
             })
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
@@ -429,11 +429,12 @@ class Trip {
      * @param reply
      * @param imageLocation
      */
-    private replySuccess = (reply, imageLocation, documentid) => {
+    private replySuccess = (reply, imageLocation, dbresponse) => {
         reply({
             message: 'ok',
             imageLocation: imageLocation,
-            id: documentid
+            id: dbresponse.id,
+            rev: dbresponse.rev
         });
     };
 
