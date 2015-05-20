@@ -116,7 +116,7 @@ class Trip {
                     parse: true,
                     allow: 'multipart/form-data',
                     // TODO: evaluate real value
-                    maxBytes: 1000000000000
+                    maxBytes: 1048576 * 5 // 5 MB
                 },
                 handler: this.savePicture,
                 description: 'Update/Change the main picture of a particular trip',
@@ -143,7 +143,7 @@ class Trip {
                     parse: true,
                     allow: 'multipart/form-data',
                     // TODO: evaluate real value
-                    maxBytes: 1000000000000
+                    maxBytes: 1048576 * 5 // 5 MB
                 },
                 handler: this.savePicture,
                 description: 'Create one of many pictures of a particular trip',
@@ -170,7 +170,7 @@ class Trip {
                     parse: true,
                     allow: 'multipart/form-data',
                     // TODO: evaluate real value
-                    maxBytes: 1000000000000
+                    maxBytes: 1048576 * 5 // 5 MB
                 },
                 handler: this.updatePicture,
                 description: 'Update/Change one of the pictures of a particular trip',
@@ -233,7 +233,7 @@ class Trip {
                     parse: true,
                     allow: 'multipart/form-data',
                     // TODO: evaluate real value
-                    maxBytes: 1000000000000
+                    maxBytes: 1048576 * 5 // 5 MB
                 },
                 handler: (request, reply) => {
                     // create an empty trip before uploading a picture
@@ -381,7 +381,7 @@ class Trip {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
             })
             .then((value) => {
-                this.replySuccess(reply, file.imageLocation, value.id)
+                this.replySuccess(reply, file.imageLocation, value)
             })
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
@@ -429,11 +429,12 @@ class Trip {
      * @param reply
      * @param imageLocation
      */
-    private replySuccess = (reply, imageLocation, documentid) => {
+    private replySuccess = (reply, imageLocation, dbresponse) => {
         reply({
             message: 'ok',
             imageLocation: imageLocation,
-            id: documentid
+            id: dbresponse.id,
+            rev: dbresponse.rev
         });
     };
 
