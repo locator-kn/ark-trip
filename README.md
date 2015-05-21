@@ -12,7 +12,7 @@
   - /trips/search
 
 ### how to use - pagination
-- add payload parameters for 'limit' and 'skip'
+- add payload parameters for 'page' and 'page_size'
 e.g.: ```{limit: 10, skip: 10}``` => result: 11 - 20 
 
 ## Search
@@ -26,6 +26,7 @@ e.g.: ```{limit: 10, skip: 10}``` => result: 11 - 20
 |checkin/checkout| optional | /trips/search/cityid.mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z**|
 |days|optional|/trips/search/cityid.mood1/**?days=2**|
 |persons|optional|/trips/search/cityid.mood1/**?persons=3**|
+|pagination|optional|/trips/search/cityid.mood1/**?page=1&page_size=10**|
 
 start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
 
