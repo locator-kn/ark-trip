@@ -456,13 +456,16 @@ class Trip {
 
     /**
      * get all Trips in Database.
-     * TODO: limit number of returned trips.
      *
      * @param request
      * @param reply
      */
     private getTrips = (request, reply) => {
-        this.db.getTrips((err, data) => {
+        var pagination = {
+            limit: (request.query.limit || 100),
+            skip: (request.query.skip || 0)
+        };
+        this.db.getTrips(pagination, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
