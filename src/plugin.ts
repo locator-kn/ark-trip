@@ -565,7 +565,7 @@ class Trip {
      */
     private  getPaginatedItems = (request, data) => {
         var paginationOption = this.getPaginationOption(request);
-        var paginatedItems = this._.rest(data, paginationOption.offset).slice(0, paginationOption.per_page);
+        var paginatedItems = this._.rest(data, paginationOption.offset).slice(0, paginationOption.page_size);
         return paginatedItems;
     };
 
@@ -573,12 +573,12 @@ class Trip {
      * Returns object with options for pagination.
      *
      * @param request
-     * @returns {{per_page: (per_page|number), offset: number}}
+     * @returns {{page_size: (page_size|number), offset: number}}
      */
     private getPaginationOption = (request) => {
         var page = (request.query.page || 1),
-            per_page = (request.query.per_page || 10),
-            offset = (page - 1) * per_page;
-        return {per_page: per_page, offset: offset};
+            page_size = (request.query.page_size || 10),
+            offset = (page - 1) * page_size;
+        return {page_size: page_size, offset: offset};
     };
 }
