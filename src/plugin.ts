@@ -544,7 +544,7 @@ class Trip {
                 return reply(this.boom.wrap(err, 400));
             }
             this._.sortBy(data, 'relevance');
-            reply(data);
+            reply(this.getPaginatedItems(request, data));
         });
     }
 
