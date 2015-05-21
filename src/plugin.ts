@@ -461,6 +461,7 @@ class Trip {
      * @param reply
      */
     private getTrips = (request, reply) => {
+        // TODO: check to use page and pageSize like in search -> Frontend question
         var pagination = {
             limit: (request.query.limit || 100),
             skip: (request.query.skip || 0)
