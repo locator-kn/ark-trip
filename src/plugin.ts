@@ -43,6 +43,15 @@ class Trip {
     };
 
     private _register(server, options) {
+        // payload for image
+        var imagePayload = {
+            output: 'stream',
+            parse: true,
+            allow: 'multipart/form-data',
+            // TODO: evaluate real value
+            maxBytes: 1048576 * 5 // 5MB
+        };
+
         // get all trips
         server.route({
             method: 'GET',
@@ -111,13 +120,7 @@ class Trip {
             path: '/trips/{tripid}/picture',
             config: {
                 auth: false,
-                payload: {
-                    output: 'stream',
-                    parse: true,
-                    allow: 'multipart/form-data',
-                    // TODO: evaluate real value
-                    maxBytes: 1048576 * 5 // 5 MB
-                },
+                payload: imagePayload,
                 handler: this.savePicture,
                 description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
@@ -138,13 +141,7 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 auth: false,
-                payload: {
-                    output: 'stream',
-                    parse: true,
-                    allow: 'multipart/form-data',
-                    // TODO: evaluate real value
-                    maxBytes: 1048576 * 5 // 5 MB
-                },
+                payload: imagePayload,
                 handler: this.savePicture,
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
@@ -165,13 +162,7 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 auth: false,
-                payload: {
-                    output: 'stream',
-                    parse: true,
-                    allow: 'multipart/form-data',
-                    // TODO: evaluate real value
-                    maxBytes: 1048576 * 5 // 5 MB
-                },
+                payload: imagePayload,
                 handler: this.updatePicture,
                 description: 'Update/Change one of the pictures of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
@@ -228,13 +219,7 @@ class Trip {
             method: 'POST',
             path: '/trips/image',
             config: {
-                payload: {
-                    output: 'stream',
-                    parse: true,
-                    allow: 'multipart/form-data',
-                    // TODO: evaluate real value
-                    maxBytes: 1048576 * 5 // 5 MB
-                },
+                payload: imagePayload,
                 handler: (request, reply) => {
                     // create an empty trip before uploading a picture
                     this.db.createTrip({type: "preTrip"}, (err, data) => {
