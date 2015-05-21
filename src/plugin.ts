@@ -555,10 +555,15 @@ class Trip {
      * And this one will not include in search, if we use the limit option in lists.
      */
     private  getPaginatedItems = (request, data) => {
+        var paginationOption = this.getPaginationOption(request);
+        var paginatedItems = this._.rest(data, paginationOption.offset).slice(0, paginationOption.per_page);
+        return paginatedItems;
+    };
+
+    private getPaginationOption = (request) => {
         var page = (request.query.page || 1),
             per_page = (request.query.per_page || 10),
-            offset = (page - 1) * per_page,
-            paginatedItems = this._.rest(data, offset).slice(0, per_page);
-        return paginatedItems;
-    }
+            offset = (page - 1) * per_page;
+        return {per_page: per_page, offset: offset};
+    };
 }
