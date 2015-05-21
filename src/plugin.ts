@@ -15,6 +15,8 @@ class Trip {
     search:any;
     _:any; // underscore.js
     schema:any;
+    paginationDefaultSize:number = 10;
+
 
     constructor() {
         this.register.attributes = {
@@ -456,13 +458,13 @@ class Trip {
 
     /**
      * get all Trips in Database.
-     * TODO: limit number of returned trips.
      *
      * @param request
      * @param reply
      */
     private getTrips = (request, reply) => {
-        this.db.getTrips((err, data) => {
+        var paginationOptions = this.getPaginationOption(request);
+        this.db.getTrips({limit: paginationOptions.page_size, skip: paginationOptions.offset}, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
@@ -541,7 +543,40 @@ class Trip {
                 return reply(this.boom.wrap(err, 400));
             }
             this._.sortBy(data, 'relevance');
-            reply(data);
+            reply(this.getPaginatedItems(request, data));
         });
     }
+
+    /**
+     * Returns a list with paginated items, call after search and sort by relevance.
+     *
+     * NOTE: Use of couchdb limit and skip param in search:
+     * parameter 'limit' in lists doesn't work, because it limits only the number of rows to use for search.
+     * But it is possible (and realistic), that the trip with the most relevance is at number 'limit+1'.
+     * And this one will not include in search, if we use the limit option in lists.
+     *
+     * Only use after search function!
+     *
+     * @param request
+     * @param data
+     * @returns {*}
+     */
+    private  getPaginatedItems = (request, data) => {
+        var paginationOption = this.getPaginationOption(request);
+        var paginatedItems = this._.rest(data, paginationOption.offset).slice(0, paginationOption.page_size);
+        return paginatedItems;
+    };
+
+    /**
+     * Returns object with options for pagination.
+     *
+     * @param request
+     * @returns {{page_size: (page_size|number), offset: number}}
+     */
+    private getPaginationOption = (request) => {
+        var page = (request.query.page || 1),
+            page_size = (request.query.page_size || this.paginationDefaultSize),
+            offset = (page - 1) * page_size;
+        return {page_size: page_size, offset: offset};
+    };
 }

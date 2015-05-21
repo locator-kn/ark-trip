@@ -1,9 +1,19 @@
 # Trip
 
 
-### How to use
+### How to use - plugin
 ## Setup
 - POST to /trips/setup
+
+## pagination
+- maximal number of return object is currently 10 (default)  **TODO: needs to be discussed**
+- implemented for GET route:
+  - /trips
+  - /trips/search
+
+### how to use - pagination
+- add query parameters for 'page' and 'page_size'
+e.g.: ```?page=2&page_size=10``` => result: 11 - 20 
 
 ## Search
 #### parameters
@@ -16,6 +26,7 @@
 |checkin/checkout| optional | /trips/search/cityid.mood1/**?start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z**|
 |days|optional|/trips/search/cityid.mood1/**?days=2**|
 |persons|optional|/trips/search/cityid.mood1/**?persons=3**|
+|pagination|optional|/trips/search/cityid.mood1/**?page=1&page_size=10**|
 
 start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
 
@@ -38,7 +49,7 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
 
 |Ressource   | Description  |  on Success | on Failure |
 |---|---|---|---|
-|/trips   | return all trips | json object | statusCode: 404 | 
+|/trips   | return only first 100 trips  | json object | statusCode: 404 | 
 |/trips/:tripID   |  return a particular trip by id | json object | statusCode: 404 | 
 |/trips/search/*(see below)   | search for a trip | json object with all matches | statusCode: 404 |
 */trips/search/58433437e7710a957cd798b0774a79385389035b.buddytrip.mood2.mood3?budget=100start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z&persons=3 
