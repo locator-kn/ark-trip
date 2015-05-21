@@ -6,14 +6,14 @@
 - POST to /trips/setup
 
 ## pagination
-- maximal number of return object is currently 100 **TODO: needs to be discussed**
-- implemented for GET routes:
+- maximal number of return object is currently 10 (default)  **TODO: needs to be discussed**
+- implemented for GET route:
   - /trips
   - /trips/search
 
 ### how to use - pagination
-- add payload parameters for 'page' and 'page_size'
-e.g.: ```{limit: 10, skip: 10}``` => result: 11 - 20 
+- add query parameters for 'page' and 'page_size'
+e.g.: ```?page=2&page_size=10``` => result: 11 - 20 
 
 ## Search
 #### parameters
