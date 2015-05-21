@@ -549,10 +549,18 @@ class Trip {
     }
 
     /**
+     * Returns a list with paginated items, call after search and sort by relevance.
+     *
      * NOTE: Use of couchdb limit and skip param in search:
      * parameter 'limit' in lists doesn't work, because it limits only the number of rows to use for search.
      * But it is possible (and realistic), that the trip with the most relevance is at number 'limit+1'.
      * And this one will not include in search, if we use the limit option in lists.
+     *
+     * Only use after search function!
+     *
+     * @param request
+     * @param data
+     * @returns {*}
      */
     private  getPaginatedItems = (request, data) => {
         var paginationOption = this.getPaginationOption(request);
@@ -560,6 +568,12 @@ class Trip {
         return paginatedItems;
     };
 
+    /**
+     * Returns object with options for pagination.
+     *
+     * @param request
+     * @returns {{per_page: (per_page|number), offset: number}}
+     */
     private getPaginationOption = (request) => {
         var page = (request.query.page || 1),
             per_page = (request.query.per_page || 10),
