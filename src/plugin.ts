@@ -15,6 +15,8 @@ class Trip {
     search:any;
     _:any; // underscore.js
     schema:any;
+    paginationDefaultSize:number = 10;
+
 
     constructor() {
         this.register.attributes = {
@@ -573,7 +575,7 @@ class Trip {
      */
     private getPaginationOption = (request) => {
         var page = (request.query.page || 1),
-            page_size = (request.query.page_size || 10),
+            page_size = (request.query.page_size || this.paginationDefaultSize),
             offset = (page - 1) * page_size;
         return {page_size: page_size, offset: offset};
     };
