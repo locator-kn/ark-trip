@@ -547,4 +547,18 @@ class Trip {
             reply(data);
         });
     }
+
+    /**
+     * NOTE: Use of couchdb limit and skip param in search:
+     * parameter 'limit' in lists doesn't work, because it limits only the number of rows to use for search.
+     * But it is possible (and realistic), that the trip with the most relevance is at number 'limit+1'.
+     * And this one will not include in search, if we use the limit option in lists.
+     */
+    private  getPaginatedItems = (request, data) => {
+        var page = (request.query.page || 1),
+            per_page = (request.query.per_page || 10),
+            offset = (page - 1) * per_page,
+            paginatedItems = this._.rest(data, offset).slice(0, per_page);
+        return paginatedItems;
+    }
 }
