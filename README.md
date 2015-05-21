@@ -1,9 +1,19 @@
 # Trip
 
 
-### How to use
+### How to use - plugin
 ## Setup
 - POST to /trips/setup
+
+## pagination
+- maximal number of return object is currently 100 **TODO: needs to be discussed**
+- implemented for GET routes:
+  - /trips
+  - /trips/search
+
+### how to use - pagination
+- add payload parameters for 'limit' and 'skip'
+e.g.: ```{limit: 10, skip: 10}``` => result: 11 - 20 
 
 ## Search
 #### parameters
@@ -38,7 +48,7 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
 
 |Ressource   | Description  |  on Success | on Failure |
 |---|---|---|---|
-|/trips   | return all trips | json object | statusCode: 404 | 
+|/trips   | return only first 100 trips  | json object | statusCode: 404 | 
 |/trips/:tripID   |  return a particular trip by id | json object | statusCode: 404 | 
 |/trips/search/*(see below)   | search for a trip | json object with all matches | statusCode: 404 |
 */trips/search/58433437e7710a957cd798b0774a79385389035b.buddytrip.mood2.mood3?budget=100start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z&persons=3 
