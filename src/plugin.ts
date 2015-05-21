@@ -461,12 +461,8 @@ class Trip {
      * @param reply
      */
     private getTrips = (request, reply) => {
-        // TODO: check to use page and pageSize like in search -> Frontend question
-        var pagination = {
-            limit: (request.query.limit || 100),
-            skip: (request.query.skip || 0)
-        };
-        this.db.getTrips(pagination, (err, data) => {
+        var paginationOptions = this.getPaginationOption(request);
+        this.db.getTrips({limit: paginationOptions.page_size, skip: paginationOptions.offset}, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
