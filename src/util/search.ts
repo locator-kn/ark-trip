@@ -85,13 +85,13 @@ class Search {
                             }
                             if (req.query.persons) {
                                 possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_PERSONS;
-                                if (req.query.persons <= row.value.persons) {
+                                if (req.query.persons == row.value.persons) {
                                     relevance.persons = RELEVANCE_CONFIG.RELEVANCE_PERSONS;
                                 }
                             }
                             if (req.query.days) {
                                 possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_DAYS;
-                                if (req.query.days <= row.value.days) {
+                                if (req.query.days == row.value.days) {
                                     relevance.days = RELEVANCE_CONFIG.RELEVANCE_DAYS;
                                 }
                             }
@@ -103,14 +103,11 @@ class Search {
                             }
                             // workaround if no param hit
                             if (total === 0) {
-                                total = 1;
-                                if (!possibleRelevance) {
-                                    // workaround if only city and date is committed
-                                    possibleRelevance = 0.5;
-                                }
-                                possibleRelevance = possibleRelevance * 2;
+                                total = 1 - possibleRelevance;
+                                row.value.relevance = (total * 100);
+                            } else {
+                                row.value.relevance = (total * 100 / possibleRelevance);
                             }
-                            row.value.relevance = (total * 100 / possibleRelevance);
 
                             // push relevant trip to result array
                             result.push(row.value);
