@@ -95,10 +95,11 @@ start_date=2014-04-20T00:00:00.000Z&end_date=2016-04-20T00:00:00.000Z
   "accommodation": "true",
   "accommodation_equipment" : ["shower", "breakfast", "tv"],
   "locations": [],
-  "images": {
+  "main_image": {
        "picture": "/i/trips/0de6ad3bdee73edf83e6848c162280f8/cooler-trip.png",
        "thumbnail": "/i/trips/0de6ad3bdee73edf83e6848c162280f8/cooler-trip-thumb.png"
    },
+  "images": [{...}, {...}, ...]
   "moods": ["halligallidrecksaufest", "grilsontour"],
   "activ": "true",
   "delete": "false",
