@@ -25,7 +25,7 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
-        this.gm = require('gm');
+        this.gm = require('gm').subClass({imageMagick: true});
         this._ = require('underscore');
         this.schema = new Schema();
         this.search = new Search();
@@ -51,7 +51,7 @@ class Trip {
             parse: true,
             allow: 'multipart/form-data',
             // TODO: evaluate real value
-            maxBytes: 1048576 * 5 // 5MB
+            maxBytes: 1048576 * 6 // 6MB
         };
 
         // get all trips
