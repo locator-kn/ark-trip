@@ -16,6 +16,7 @@ class Trip {
     _:any; // underscore.js
     schema:any;
     paginationDefaultSize:number = 10;
+    private imageUtil;
 
 
     constructor() {
@@ -25,10 +26,11 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
-        this.gm = require('gm').subClass({imageMagick: true});
         this._ = require('underscore');
         this.schema = new Schema();
         this.search = new Search();
+        this.imageUtil = require('locator-image-utility').image;
+
     }
 
 
@@ -346,23 +348,22 @@ class Trip {
      * @param request
      * @param reply
      */
-    private savePicture = (request, reply, originalName) => {
+    private savePicture = (request, reply, name) => {
 
-        var file = this.getFileInformation(request, originalName);
+        var imageProcessor = this.imageUtil.processor(request);
 
-        var attachmentData = {
-            'Content-Type': request.payload.file.hapi.headers['content-type'],
-            name: file.filename
-        };
+        var file = imageProcessor.createFileInformation(name);
+
+        var attachmentData = imageProcessor.getAttachmentData(file.filename);
 
         // create a read stream and crop it
         // TODO: size needs to be discussed
-        var readStream = this.crop(request, 1500, 675);
-        var thumbnailStream = this.crop(request, 120, 120);
+        var readStream = imageProcessor.createCroppedStream(1500, 675);
+        var thumbnailStream = imageProcessor.createCroppedStream(120, 120);
 
         this.db.savePicture(request.params.tripid, attachmentData, readStream)
             .then(() => {
-                attachmentData.name = file.thumbname;
+                attachmentData.name = file.thumbnailName;
                 return this.db.savePicture(request.params.tripid, attachmentData, thumbnailStream);
             }).then(() => {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
@@ -380,32 +381,15 @@ class Trip {
      */
     private updatePicture = (request, reply) => {
         // check first if entry exist in the database
-        this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
+        var file = request.payload.nameOfFile;
+        this.db.entryExist(request.params.tripid, file)
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
             }).then(() => {
-                this.savePicture(request, reply, true);
+                this.savePicture(request, reply, file);
             });
 
     };
-
-    /**
-     * Crop a payload file and return a stream.
-     *
-     * @param request
-     * @param x
-     * @param y
-     * @returns {any}
-     */
-    private crop(request, x, y) {
-        return this.gm(request.payload.file)
-            .crop(request.payload.width,
-            request.payload.height,
-            request.payload.xCoord,
-            request.payload.yCoord)
-            .resize(x, y)
-            .stream();
-    }
 
     /**
      * reply a success message.
