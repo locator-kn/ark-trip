@@ -16,9 +16,9 @@ class Trip {
     _:any; // underscore.js
     schema:any;
     paginationDefaultSize:number = 10;
-    private imageUtil;
-    private uuid;
-    private regex;
+    imageUtil:any;
+    uuid:any;
+    regex:any;
 
 
     constructor() {
@@ -32,7 +32,7 @@ class Trip {
         this.schema = new Schema();
         this.search = new Search();
         this.imageUtil = require('locator-image-utility').image;
-        this.regex = require('locator-image-utility').regex
+        this.regex = require('locator-image-utility').regex;
         this.uuid = require('node-uuid');
 
     }
@@ -337,8 +337,7 @@ class Trip {
         var attachmentData = imageProcessor.getAttachmentData(file.filename);
 
         // create a read stream and crop it
-        // TODO: size needs to be discussed
-        var readStream = imageProcessor.createCroppedStream(1500, 675);
+        var readStream = imageProcessor.createCroppedStream(1500, 675);  // TODO: size needs to be discussed
         var thumbnailStream = imageProcessor.createCroppedStream(120, 120);
 
         this.db.savePicture(request.params.tripid, attachmentData, readStream)
