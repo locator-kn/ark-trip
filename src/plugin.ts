@@ -17,6 +17,7 @@ class Trip {
     schema:any;
     paginationDefaultSize:number = 10;
     private imageUtil;
+    private uuid;
 
 
     constructor() {
@@ -30,6 +31,7 @@ class Trip {
         this.schema = new Schema();
         this.search = new Search();
         this.imageUtil = require('locator-image-utility').image;
+        this.uuid = require('node-uuid');
 
     }
 
@@ -146,7 +148,11 @@ class Trip {
             config: {
                 auth: false,
                 payload: imagePayload,
-                handler: this.savePicture,
+                handler: (request, reply) => {
+                    // create image with random uuid
+                    // TODO: think of a better approach
+                    this.savePicture(request, reply, this.uuid.v4())
+                },
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
                 tags: ['api', 'trip'],
