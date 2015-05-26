@@ -1,7 +1,7 @@
 export default
 class Schema {
     joi:any;
-    public regex:any;
+    public imageValidation:any;
     public tripSchemaPost:any;
     public tripSchemaPUT:any;
     public imageSchemaPost:any;
@@ -11,8 +11,7 @@ class Schema {
 
     constructor() {
         this.joi = require('joi');
-        this.regex = require('locators-regex');
-        this.hoek = require('hoek');
+        this.imageValidation = require('locator-image-utility').validation;
 
         this.initSchemas();
     }
@@ -57,28 +56,10 @@ class Schema {
         this.tripSchemaPUT = putMethodElements.concat(trip);
 
         // images validation
-        this.basicImageSchema = {
-            // validate file type to be an image
-            file: this.joi.object({
-                hapi: {
-                    headers: {
-                        'content-type': this.joi.string()
-                            .regex(this.regex.imageContentType)
-                            .required()
-                    }
-                }
-            }).options({allowUnknown: true}).required(),
-            // validate that a correct dimension object is emitted
-            width: this.joi.number().integer().required(),
-            height: this.joi.number().integer().required(),
-            xCoord: this.joi.number().integer().required(),
-            yCoord: this.joi.number().integer().required()
-        };
-
-        this.imageSchemaPost = this.hoek.clone(this.basicImageSchema);
+        this.imageSchemaPost = this.imageValidation.basicImageSchema;
         this.imageSchemaPost.nameOfTrip = this.joi.string().required();
 
-        this.imageSchemaPut = this.hoek.clone(this.basicImageSchema);
+        this.imageSchemaPut = this.imageValidation.basicImageSchema;
         this.imageSchemaPut.nameOfFile = this.joi.string().min(1).required();
     }
 
