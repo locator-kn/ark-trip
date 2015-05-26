@@ -16,6 +16,9 @@ class Trip {
     _:any; // underscore.js
     schema:any;
     paginationDefaultSize:number = 10;
+    imageUtil:any;
+    uuid:any;
+    regex:any;
 
 
     constructor() {
@@ -25,10 +28,13 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
-        this.gm = require('gm').subClass({imageMagick: true});
         this._ = require('underscore');
         this.schema = new Schema();
         this.search = new Search();
+        this.imageUtil = require('locator-image-utility').image;
+        this.regex = require('locator-image-utility').regex;
+        this.uuid = require('node-uuid');
+
     }
 
 
@@ -52,6 +58,12 @@ class Trip {
             allow: 'multipart/form-data',
             // TODO: evaluate real value
             maxBytes: 1048576 * 6 // 6MB
+        };
+
+        var swaggerUpload = {
+            'hapi-swagger': {
+                payloadType: 'form'
+            }
         };
 
         // get all trips
@@ -109,7 +121,7 @@ class Trip {
                         name: this.joi.string()
                             .required(),
                         ext: this.joi.string()
-                            .required().regex(this.schema.regex.imageExtension)
+                            .required().regex(this.regex.imageExtension)
                     }
                 }
 
@@ -133,7 +145,8 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -144,7 +157,11 @@ class Trip {
             config: {
                 auth: false,
                 payload: imagePayload,
-                handler: this.savePicture,
+                handler: (request, reply) => {
+                    // create image with random uuid
+                    // TODO: think of a better approach
+                    this.savePicture(request, reply, this.uuid.v4())
+                },
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
                 tags: ['api', 'trip'],
@@ -154,7 +171,8 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -175,7 +193,8 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPut
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -239,7 +258,8 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
 
         });
@@ -299,81 +319,38 @@ class Trip {
     }
 
     /**
-     * Function to get file information for a file, from a request.
-     *
-     * @param request
-     * @returns {{ext: string, filename: string, thumbname: string, url: string, thumbURL: string, imageLocation: {}}}
-     */
-    private getFileInformation(request:any, originalName) {
-        var file = {
-            ext: '',
-            filename: '',
-            thumbname: '',
-            url: '',
-            thumbURL: '',
-            imageLocation: {}
-        };
-
-        file.ext = request.payload.file.hapi.headers['content-type']
-            .match(this.schema.regex.imageExtension);
-
-        if (originalName) {
-            // file, which will be updated
-            var _file = request.payload.nameOfFile.split('.')[0];
-            file.filename = _file + '.' + file.ext;
-            file.thumbname = _file + '-thumb.' + file.ext;
-        } else {
-            // file, which will be updated
-            file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;
-            file.thumbname = request.payload.nameOfTrip + '-trip-thumb.' + file.ext;
-        }
-
-
-        // "/i/" will be mapped to /api/vX/ from nginx
-        file.url = '/i/trips/' + request.params.tripid + '/' + file.filename;
-        file.thumbURL = '/i/trips/' + request.params.tripid + '/' + file.thumbname;
-
-        file.imageLocation = {
-            picture: file.url,
-            thumbnail: file.thumbURL
-        };
-        return file;
-    }
-
-    /**
      * Save picture.
      *
      * @param request
      * @param reply
      */
-    private savePicture = (request, reply, originalName) => {
+    private savePicture = (request, reply, name) => {
 
-        var file = this.getFileInformation(request, originalName);
+        if (!name) {
+            name = request.payload.nameOfTrip + '-trip'
+        }
 
-        var attachmentData = {
-            'Content-Type': request.payload.file.hapi.headers['content-type'],
-            name: file.filename
-        };
+        var imageProcessor = this.imageUtil.processor(request);
+
+        var file = imageProcessor.createFileInformation(name);
+
+        var attachmentData = imageProcessor.getAttachmentData(file.filename);
 
         // create a read stream and crop it
-        // TODO: size needs to be discussed
-        var readStream = this.crop(request, 1500, 675);
-        var thumbnailStream = this.crop(request, 120, 120);
+        var readStream = imageProcessor.createCroppedStream(1500, 675);  // TODO: size needs to be discussed
+        var thumbnailStream = imageProcessor.createCroppedStream(120, 120);
 
         this.db.savePicture(request.params.tripid, attachmentData, readStream)
             .then(() => {
-                attachmentData.name = file.thumbname;
+                attachmentData.name = file.thumbnailName;
                 return this.db.savePicture(request.params.tripid, attachmentData, thumbnailStream);
             }).then(() => {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
-            })
-            .then((value) => {
+            }).then((value) => {
                 this.replySuccess(reply, file.imageLocation, value)
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 return reply(this.boom.badRequest(err));
             });
-
     };
 
     /**
@@ -383,32 +360,15 @@ class Trip {
      */
     private updatePicture = (request, reply) => {
         // check first if entry exist in the database
-        this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
+        var file = request.payload.nameOfFile;
+        this.db.entryExist(request.params.tripid, file)
             .catch((err) => {
                 return reply(this.boom.badRequest(err));
             }).then(() => {
-                this.savePicture(request, reply, true);
+                this.savePicture(request, reply, file);
             });
 
     };
-
-    /**
-     * Crop a payload file and return a stream.
-     *
-     * @param request
-     * @param x
-     * @param y
-     * @returns {any}
-     */
-    private crop(request, x, y) {
-        return this.gm(request.payload.file)
-            .crop(request.payload.width,
-            request.payload.height,
-            request.payload.xCoord,
-            request.payload.yCoord)
-            .resize(x, y)
-            .stream();
-    }
 
     /**
      * reply a success message.
