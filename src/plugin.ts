@@ -301,54 +301,16 @@ class Trip {
     }
 
     /**
-     * Function to get file information for a file, from a request.
-     *
-     * @param request
-     * @returns {{ext: string, filename: string, thumbname: string, url: string, thumbURL: string, imageLocation: {}}}
-     */
-    private getFileInformation(request:any, originalName) {
-        var file = {
-            ext: '',
-            filename: '',
-            thumbname: '',
-            url: '',
-            thumbURL: '',
-            imageLocation: {}
-        };
-
-        file.ext = request.payload.file.hapi.headers['content-type']
-            .match(this.schema.regex.imageExtension);
-
-        if (originalName) {
-            // file, which will be updated
-            var _file = request.payload.nameOfFile.split('.')[0];
-            file.filename = _file + '.' + file.ext;
-            file.thumbname = _file + '-thumb.' + file.ext;
-        } else {
-            // file, which will be updated
-            file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;
-            file.thumbname = request.payload.nameOfTrip + '-trip-thumb.' + file.ext;
-        }
-
-
-        // "/i/" will be mapped to /api/vX/ from nginx
-        file.url = '/i/trips/' + request.params.tripid + '/' + file.filename;
-        file.thumbURL = '/i/trips/' + request.params.tripid + '/' + file.thumbname;
-
-        file.imageLocation = {
-            picture: file.url,
-            thumbnail: file.thumbURL
-        };
-        return file;
-    }
-
-    /**
      * Save picture.
      *
      * @param request
      * @param reply
      */
     private savePicture = (request, reply, name) => {
+
+        if (!name) {
+            name = request.payload.nameOfTrip + '-trip'
+        }
 
         var imageProcessor = this.imageUtil.processor(request);
 
