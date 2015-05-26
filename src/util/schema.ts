@@ -12,6 +12,7 @@ class Schema {
     constructor() {
         this.joi = require('joi');
         this.imageValidation = require('locator-image-utility').validation;
+        this.hoek = require('hoek');
 
         this.initSchemas();
     }
@@ -56,7 +57,7 @@ class Schema {
         this.tripSchemaPUT = putMethodElements.concat(trip);
 
         // images validation
-        this.imageSchemaPost = this.imageValidation.basicImageSchema;
+        this.imageSchemaPost = this.hoek.clone(this.imageValidation.basicImageSchema);
         this.imageSchemaPost.nameOfTrip = this.joi.string().required();
 
         this.imageSchemaPut = this.imageValidation.basicImageSchema;

@@ -18,6 +18,7 @@ class Trip {
     paginationDefaultSize:number = 10;
     private imageUtil;
     private uuid;
+    private regex;
 
 
     constructor() {
@@ -31,6 +32,7 @@ class Trip {
         this.schema = new Schema();
         this.search = new Search();
         this.imageUtil = require('locator-image-utility').image;
+        this.regex = require('locator-image-utility').regex
         this.uuid = require('node-uuid');
 
     }
@@ -56,6 +58,12 @@ class Trip {
             allow: 'multipart/form-data',
             // TODO: evaluate real value
             maxBytes: 1048576 * 6 // 6MB
+        };
+
+        var swaggerUpload = {
+            'hapi-swagger': {
+                payloadType: 'form'
+            }
         };
 
         // get all trips
@@ -113,7 +121,7 @@ class Trip {
                         name: this.joi.string()
                             .required(),
                         ext: this.joi.string()
-                            .required().regex(this.schema.regex.imageExtension)
+                            .required().regex(this.regex.imageExtension)
                     }
                 }
 
@@ -137,7 +145,8 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -162,7 +171,8 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -183,7 +193,8 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPut
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -247,7 +258,8 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
 
         });
