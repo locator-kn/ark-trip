@@ -366,14 +366,11 @@ class Trip {
                 return this.db.savePicture(request.params.tripid, attachmentData, thumbnailStream);
             }).then(() => {
                 return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
-            })
-            .then((value) => {
+            }).then((value) => {
                 this.replySuccess(reply, file.imageLocation, value)
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 return reply(this.boom.badRequest(err));
             });
-
     };
 
     /**
