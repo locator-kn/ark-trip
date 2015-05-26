@@ -32,8 +32,7 @@
     "boom": "^2.7.1",
     "gm": "^1.17.0",
     "joi": "^6.2.0",
-    "locator-image-utility": "0.0.1",
-    "locators-regex": "0.0.1",
+    "locator-image-utility": "latest",
     "sinon": "^1.14.1",
     "typescript": "^1.5.0-alpha",
     "underscore": "^1.8.3"
