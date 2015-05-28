@@ -25,8 +25,6 @@ class Schema {
         // basic trip schema
         var trip = this.joi.object().keys({
             title: this.joi.string().required(),
-            // read form session
-            userid: this.joi.string().optional(),
             description: this.joi.string().required(),
             description_money: this.joi.string(),
             city: this.joi.object().keys({
@@ -36,14 +34,21 @@ class Schema {
             }),
             start_date: this.joi.date(),
             end_date: this.joi.date(),
-            accommodation: this.joi.boolean(),
+            accommodation: this.joi.boolean().required(),
             accommodation_equipment: this.joi.array(),
             moods: this.joi.array(),
+
+
             locations: this.joi.array(),
-            pics: this.joi.array(),
+
+            // TODO: required?
             persons: this.joi.number().integer(),
+
+            // TODO: Frontend?
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false),
+
+            // TODO: needed? Route itself is sufficient
             type: this.joi.string().required().valid('trip')
         });
 
