@@ -392,12 +392,15 @@ class Trip {
      * @param reply
      */
     private createTrip = (request, reply) => {
-        // TODO: read user id from session and create trip with this info
+
+        // get user id from authentication credentials
+        request.payload.userid = request.auth.credentials._id;
+
         this.db.createTrip(request.payload, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
-            reply(data);
+            return reply(data);
         });
     };
 
