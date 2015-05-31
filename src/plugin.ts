@@ -97,6 +97,7 @@ class Trip {
         });
 
         // get a (one of optional many) picture of a particular trip
+        // TODO: redirect it to one special route handling pictures
         server.route({
             method: 'GET',
             path: '/trips/{tripid}/{name}.{ext}',
@@ -330,24 +331,29 @@ class Trip {
             name = request.payload.nameOfTrip + '-trip'
         }
 
-        var imageProcessor = this.imageUtil.processor(request);
+        var stripped = this.imageUtil.stripHapiRequestObject(request);
+        stripped.options.id = request.auth.credentials._id;
 
-        var file = imageProcessor.createFileInformation(name);
+        var imageProcessor = this.imageUtil.processor(stripped.options);
+        if (imageProcessor.error) {
+            console.log(imageProcessor);
+            return reply(this.boom.create(400, imageProcessor.error))
+        }
 
-        var attachmentData = imageProcessor.getAttachmentData(file.filename);
+        var metaData = imageProcessor.createFileInformation(name);
 
         // create a read stream and crop it
-        var readStream = imageProcessor.createCroppedStream(1500, 675);  // TODO: size needs to be discussed
-        var thumbnailStream = imageProcessor.createCroppedStream(120, 120);
+        var readStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
+        var thumbnailStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 120, y: 120});
 
-        this.db.savePicture(request.params.tripid, attachmentData, readStream)
+        this.db.savePicture(stripped.options.id, metaData.attachmentData, readStream)
             .then(() => {
-                attachmentData.name = file.thumbnailName;
-                return this.db.savePicture(request.params.tripid, attachmentData, thumbnailStream);
+                metaData.attachmentData.name = metaData.thumbnailName;
+                return this.db.savePicture(stripped.options.id, metaData.attachmentData, thumbnailStream);
             }).then(() => {
-                return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
+                return this.db.updateDocument(stripped.options.id, {images: metaData.imageLocation});
             }).then((value) => {
-                this.replySuccess(reply, file.imageLocation, value)
+                this.replySuccess(reply, metaData.imageLocation, value)
             }).catch((err) => {
                 return reply(this.boom.badRequest(err));
             });
