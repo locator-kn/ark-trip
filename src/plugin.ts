@@ -134,7 +134,6 @@ class Trip {
             method: ['PUT', 'POST'],
             path: '/trips/{tripid}/picture',
             config: {
-                auth: false,
                 payload: imagePayload,
                 handler: this.savePicture,
                 description: 'Update/Change the main picture of a particular trip',
@@ -156,7 +155,6 @@ class Trip {
             method: 'POST',
             path: '/trips/{tripid}/picture/more',
             config: {
-                auth: false,
                 payload: imagePayload,
                 handler: (request, reply) => {
                     // create image with random uuid
