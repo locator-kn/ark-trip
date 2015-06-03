@@ -248,6 +248,8 @@ class Trip {
                         }
                         // add the generated id from database to the request object
                         request.params.tripid = data.id;
+                        // get user id from authentication credentials
+                        request.payload.userid = request.auth.credentials._id;
 
                         // save picture to the just created document
                         this.savePicture(request, reply, false);
