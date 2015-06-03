@@ -330,7 +330,12 @@ class Trip {
         }
 
         var stripped = this.imageUtil.stripHapiRequestObject(request);
-        stripped.options.id = request.auth.credentials._id;
+
+        if (!request.params.tripid) {
+            stripped.options.id = request.auth.credentials._id;
+        }
+
+        stripped.options.id = request.params.tripid;
 
         var imageProcessor = this.imageUtil.processor(stripped.options);
         if (imageProcessor.error) {
