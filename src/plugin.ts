@@ -252,7 +252,7 @@ class Trip {
             config: {
                 payload: imagePayload,
                 handler: (request, reply) => {
-                    // create an empty trip before uploading a picture
+                    // create an empty "preTrip" before uploading a picture
                     this.db.createTrip({type: "preTrip"}, (err, data) => {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
@@ -393,7 +393,7 @@ class Trip {
     };
 
     /**
-     * reply a success message.
+     * reply a success message for uploading a picture.
      *
      * @param reply
      * @param imageLocation
@@ -417,6 +417,7 @@ class Trip {
 
         // get user id from authentication credentials
         request.payload.userid = request.auth.credentials._id;
+        request.payload.type = 'trip';
 
         this.db.createTrip(request.payload, (err, data) => {
             if (err) {

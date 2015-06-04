@@ -47,9 +47,6 @@ class Schema {
             // TODO: Frontend?
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false),
-
-            // TODO: needed? Route itself is sufficient
-            type: this.joi.string().required().valid('trip')
         });
 
         // required elements for PUT method.
