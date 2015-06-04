@@ -96,6 +96,17 @@ class Trip {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/trips/my/trips',
+            config: {
+                auth: false,
+                handler: this.getMyTrips,
+                description: 'Get all my trips',
+                tags: ['api', 'trip']
+            }
+        });
+
         // get a (one of optional many) picture of a particular trip
         // TODO: redirect it to one special route handling pictures
         server.route({
@@ -439,6 +450,21 @@ class Trip {
     private getTrips = (request, reply) => {
         var paginationOptions = this.getPaginationOption(request);
         this.db.getTrips({limit: paginationOptions.page_size, skip: paginationOptions.offset}, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
+    /**
+     * Retrieve all trips from this user
+     *
+     * @param request
+     * @param reply
+     */
+    private getMyTrips = (request, reply) => {
+        this.db.getUserTrips(request.auth.credentials._id, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
