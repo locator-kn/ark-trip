@@ -69,10 +69,10 @@ class Schema {
                 then: this.joi.valid(true).required(),
                 otherwise: this.joi.boolean()
             })
-        });
+        }).required().min(1).description('Update Trip JSON object');
 
 
-        this.tripSchemaPost = tripSchema;
+        this.tripSchemaPost = tripSchema.required().description('Trip JSON object');
 
         // images validation
         this.imageSchemaPost = this.hoek.clone(this.imageValidation.basicImageSchema);

@@ -301,8 +301,6 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.tripSchemaPUT
-                        .required()
-                        .description('Trip JSON object')
                 }
 
             }
