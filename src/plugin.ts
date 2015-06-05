@@ -239,8 +239,6 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.tripSchemaPost
-                        .required()
-                        .description('Trip JSON object')
                 }
             }
         });
