@@ -6,7 +6,7 @@ class Schema {
     public tripSchemaPUT:any;
     public imageSchemaPost:any;
     public imageSchemaPut:any;
-    basicImageSchema:any;
+    private basicImageSchema:any;
     private hoek:any;
 
     constructor() {
@@ -59,10 +59,19 @@ class Schema {
             delete: this.joi.boolean().default(false),
         });
 
+        var optSchema = tripSchema.optionalKeys('title', 'city', 'description',
+            'start_date', 'end_date', 'persons', 'days', 'accommodation');
 
-        // TODO make keys optional
-        this.tripSchemaPUT = tripSchema.keys({id: this.joi.string().required()});
-        
+        this.tripSchemaPUT = optSchema.keys({
+            // if equipment is provided, this key must be true
+            accommodation: this.joi.when('accommodation_equipment', {
+                is: this.joi.array().required(),
+                then: this.joi.valid(true).required(),
+                otherwise: this.joi.boolean()
+            })
+        });
+
+
         this.tripSchemaPost = tripSchema;
 
         // images validation

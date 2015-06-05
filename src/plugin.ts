@@ -434,7 +434,7 @@ class Trip {
      * @param reply
      */
     private updateTrip = (request, reply) => {
-        this.db.updateTrip(request.payload.id, request.payload, (err, data) => {
+        this.db.updateTrip(request.params.tripid, request.payload, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
