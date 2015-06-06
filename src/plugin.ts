@@ -1,3 +1,6 @@
+declare
+var Promise:any;
+
 import Search from './util/search';
 import Schema from './util/schema';
 
@@ -134,12 +137,13 @@ class Trip {
             }
         });
 
+        //TODO provide the functionality to get only trips upon a certain date
         server.route({
             method: 'GET',
-            path: '/users/{userid}/trips{opt}', //TODO evaluate given options
+            path: '/users/{userid}/trips',
             config: {
                 auth: false,
-                handler: this.getTipsOfUser,
+                handler: this.getTripsOfUser,
                 description: 'Get all trips of this specific user',
                 tags: ['api', 'trip', 'user'],
                 validate: {
@@ -310,7 +314,7 @@ class Trip {
                 }
             }
         });
-        
+
         // delete a particular trip
         server.route({
             method: 'DELETE',
@@ -350,6 +354,7 @@ class Trip {
      */
     private savePicture = (request, reply, name) => {
 
+        // TODO: Because of performance this method must not always be called.
         this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
             .catch((err) => reply(err))
             .then(() => {
@@ -477,8 +482,8 @@ class Trip {
         });
     };
 
-    private getTipsOfUser = (request, reply) => {
-        this.db.getUserTrips(request.paramas.userid, (err, data) => {
+    private getTripsOfUser = (request, reply) => {
+        this.db.getUserTrips(request.params.userid, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
@@ -614,7 +619,7 @@ class Trip {
      * @param tripid
      * @returns {Promise|Promise<T>}
      */
-    private isItMyTrip(userid:string, tripid:string):Promise {
+    private isItMyTrip(userid:string, tripid:string):any {
         return new Promise((reject, resolve) => {
 
             this.db.getTripById(tripid, (err, data) => {
