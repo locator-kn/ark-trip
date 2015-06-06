@@ -310,7 +310,7 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 handler: this.deleteTripById,
-                description: 'delete a particular trip',
+                description: 'delete a particular trip. Note this user must be owner of this trip',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
@@ -333,24 +333,25 @@ class Trip {
      */
     private savePicture = (request, reply, name) => {
 
+        // set name of file, if not defined
         if (!name) {
             name = request.payload.nameOfTrip + '-trip'
         }
 
+        // extract only needed information of the request object
         var stripped = this.imageUtil.stripHapiRequestObject(request);
 
-        if (!request.params.tripid) {
-            stripped.options.id = request.auth.credentials._id;
-        }
-
+        // set the trip, where the picture should be saved
         stripped.options.id = request.params.tripid;
 
+        // create object for processing images
         var imageProcessor = this.imageUtil.processor(stripped.options);
         if (imageProcessor.error) {
             console.log(imageProcessor);
-            return reply(this.boom.create(400, imageProcessor.error))
+            return reply(this.boom.badRequest(imageProcessor.error))
         }
 
+        // get info needed for output or database
         var metaData = imageProcessor.createFileInformation(name);
 
         // create a read stream and crop it
