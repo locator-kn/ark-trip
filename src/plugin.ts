@@ -430,11 +430,12 @@ class Trip {
      * @param reply
      */
     private updateTrip = (request, reply) => {
-        this.db.updateTrip(request.params.tripid, request.payload, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            reply(data);
+        this.isItMyTrip(request.auth.credentials._id, request.params.tripid).then(() => {
+            return this.db.updateTrip(request.params.tripid, request.payload)
+        }).then((data) => {
+            return reply(data);
+        }).catch((err) => {
+            return reply(this.boom.badRequest(err));
         });
     };
 
