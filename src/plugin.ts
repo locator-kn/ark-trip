@@ -231,7 +231,6 @@ class Trip {
             method: 'PUT',
             path: '/trips/{tripid}/picture/more',
             config: {
-                auth: false,
                 payload: imagePayload,
                 handler: this.updatePicture,
                 description: 'Update/Change one of the pictures of a particular trip',
@@ -294,17 +293,6 @@ class Trip {
 
         });
 
-        // create the views for couchdb
-        server.route({
-            method: 'POST',
-            path: '/trips/setup',
-            config: {
-                handler: this.createSearchView,
-                description: 'Setup all views and lists for couchdb',
-                tags: ['api', 'trip']
-            }
-        });
-
         // update a particular trip
         server.route({
             method: 'PUT',
@@ -322,8 +310,7 @@ class Trip {
                 }
             }
         });
-
-
+        
         // delete a particular trip
         server.route({
             method: 'DELETE',
@@ -337,6 +324,17 @@ class Trip {
                         tripid: this.joi.string().required()
                     }
                 }
+            }
+        });
+
+        // create the views for couchdb
+        server.route({
+            method: 'POST',
+            path: '/trips/setup',
+            config: {
+                handler: this.createSearchView,
+                description: 'Setup all views and lists for couchdb',
+                tags: ['api', 'trip']
             }
         });
 
