@@ -106,6 +106,21 @@ class Trip {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/users/{userid}/trips{opt}', //TODO evaluate given options
+            config: {
+                auth: false,
+                handler: this.getTipsOfUser,
+                description: 'Get all trips of this specific user',
+                tags: ['api', 'trip', 'user'],
+                validate: {
+                    params: {
+                        userid: this.joi.string().required()
+                    }
+                }
+            }
+        });
         // get a (one of optional many) picture of a particular trip
         // TODO: redirect it to one special route handling pictures
         server.route({
@@ -455,6 +470,15 @@ class Trip {
         });
     };
 
+    private getTipsOfUser = (request, reply) => {
+        this.db.getUserTrips(request.paramas.userid, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
     /**
      * Retrieve all trips from this user
      *
@@ -508,7 +532,7 @@ class Trip {
     private createSearchView = (request, reply) => {
         this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
             if (err) {
-                return reply(this.boom.wrap(err, 400));
+                return reply(this.boom.badRequest(err));
             } else {
                 reply(msg);
             }
@@ -537,7 +561,7 @@ class Trip {
         };
         this.db.searchTripsByQuery(query, (err, data)=> {
             if (err) {
-                return reply(this.boom.badRequest(err));
+                return reply(this.boom.wrap(err, 400));
             }
             this._.sortBy(data, 'relevance');
             reply(this.getPaginatedItems(request, data));
