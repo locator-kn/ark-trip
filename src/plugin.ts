@@ -1,3 +1,6 @@
+declare
+var Promise:any;
+
 import Search from './util/search';
 import Schema from './util/schema';
 
@@ -96,6 +99,60 @@ class Trip {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/users/my/trips',
+            config: {
+                handler: this.getMyTrips,
+                description: 'Get all my trips',
+                tags: ['api', 'trip']
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/users/my/trips/{tripid}',
+            config: {
+                handler: this.getTripById,
+                description: 'Get a specific trip. Results in the same as calling GET /trips/:tripId.',
+                tags: ['api', 'trip']
+            }
+        });
+
+        // get a particular trip
+        server.route({
+            method: 'GET',
+            path: '/trips/{tripid}',
+            config: {
+                auth: false,
+                handler: this.getTripById,
+                description: 'Get particular trip by id',
+                notes: 'sample call: /trips/1222123132',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string().required()
+                    }
+                }
+            }
+        });
+
+        //TODO provide the functionality to get only trips upon a certain date
+        server.route({
+            method: 'GET',
+            path: '/users/{userid}/trips',
+            config: {
+                auth: false,
+                handler: this.getTripsOfUser,
+                description: 'Get all trips of this specific user',
+                tags: ['api', 'trip', 'user'],
+                validate: {
+                    params: {
+                        userid: this.joi.string().required()
+                    }
+                }
+            }
+        });
         // get a (one of optional many) picture of a particular trip
         // TODO: redirect it to one special route handling pictures
         server.route({
@@ -141,8 +198,7 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
                 },
@@ -166,8 +222,7 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
                 },
@@ -180,7 +235,6 @@ class Trip {
             method: 'PUT',
             path: '/trips/{tripid}/picture/more',
             config: {
-                auth: false,
                 payload: imagePayload,
                 handler: this.updatePicture,
                 description: 'Update/Change one of the pictures of a particular trip',
@@ -198,26 +252,6 @@ class Trip {
         });
 
 
-        // get a particular trip
-        server.route({
-            method: 'GET',
-            path: '/trips/{tripid}',
-            config: {
-                auth: false,
-                handler: this.getTripById,
-                description: 'Get particular trip by id',
-                notes: 'sample call: /trips/1222123132',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required()
-                    }
-                }
-
-            }
-        });
-
         // create a new trip
         server.route({
             method: 'POST',
@@ -228,8 +262,6 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.tripSchemaPost
-                        .required()
-                        .description('Trip JSON object')
                 }
             }
         });
@@ -241,7 +273,7 @@ class Trip {
             config: {
                 payload: imagePayload,
                 handler: (request, reply) => {
-                    // create an empty trip before uploading a picture
+                    // create an empty "preTrip" before uploading a picture
                     this.db.createTrip({type: "preTrip"}, (err, data) => {
                         if (err) {
                             return reply(this.boom.wrap(err, 400));
@@ -265,17 +297,6 @@ class Trip {
 
         });
 
-        // create the views for couchdb
-        server.route({
-            method: 'POST',
-            path: '/trips/setup',
-            config: {
-                handler: this.createSearchView,
-                description: 'Setup all views and lists for couchdb',
-                tags: ['api', 'trip']
-            }
-        });
-
         // update a particular trip
         server.route({
             method: 'PUT',
@@ -290,13 +311,9 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.tripSchemaPUT
-                        .required()
-                        .description('Trip JSON object')
                 }
-
             }
         });
-
 
         // delete a particular trip
         server.route({
@@ -304,14 +321,24 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 handler: this.deleteTripById,
-                description: 'delete a particular trip',
+                description: 'delete a particular trip. Note this user must be owner of this trip',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     }
                 }
+            }
+        });
+
+        // create the views for couchdb
+        server.route({
+            method: 'POST',
+            path: '/trips/setup',
+            config: {
+                handler: this.createSearchView,
+                description: 'Setup all views and lists for couchdb',
+                tags: ['api', 'trip']
             }
         });
 
@@ -327,40 +354,47 @@ class Trip {
      */
     private savePicture = (request, reply, name) => {
 
-        if (!name) {
-            name = request.payload.nameOfTrip + '-trip'
-        }
-
-        var stripped = this.imageUtil.stripHapiRequestObject(request);
-
-        if (!request.params.tripid) {
-            stripped.options.id = request.auth.credentials._id;
-        }
-
-        stripped.options.id = request.params.tripid;
-
-        var imageProcessor = this.imageUtil.processor(stripped.options);
-        if (imageProcessor.error) {
-            console.log(imageProcessor);
-            return reply(this.boom.create(400, imageProcessor.error))
-        }
-
-        var metaData = imageProcessor.createFileInformation(name);
-
-        // create a read stream and crop it
-        var readStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
-        var thumbnailStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 120, y: 120});
-
-        this.db.savePicture(stripped.options.id, metaData.attachmentData, readStream)
+        // TODO: Because of performance this method must not always be called.
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .catch((err) => reply(err))
             .then(() => {
-                metaData.attachmentData.name = metaData.thumbnailName;
-                return this.db.savePicture(stripped.options.id, metaData.attachmentData, thumbnailStream);
-            }).then(() => {
-                return this.db.updateDocument(stripped.options.id, {images: metaData.imageLocation});
-            }).then((value) => {
-                this.replySuccess(reply, metaData.imageLocation, value)
-            }).catch((err) => {
-                return reply(this.boom.badRequest(err));
+
+                // set name of file, if not defined
+                if (!name) {
+                    name = request.payload.nameOfTrip + '-trip'
+                }
+
+                // extract only needed information of the request object
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+
+                // set the trip, where the picture should be saved
+                stripped.options.id = request.params.tripid;
+
+                // create object for processing images
+                var imageProcessor = this.imageUtil.processor(stripped.options);
+                if (imageProcessor.error) {
+                    console.log(imageProcessor);
+                    return reply(this.boom.badRequest(imageProcessor.error))
+                }
+
+                // get info needed for output or database
+                var metaData = imageProcessor.createFileInformation(name);
+
+                // create a read stream and crop it
+                var readStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
+                var thumbnailStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 120, y: 120});
+
+                this.db.savePicture(stripped.options.id, metaData.attachmentData, readStream)
+                    .then(() => {
+                        metaData.attachmentData.name = metaData.thumbnailName;
+                        return this.db.savePicture(stripped.options.id, metaData.attachmentData, thumbnailStream);
+                    }).then(() => {
+                        return this.db.updateDocument(stripped.options.id, {images: metaData.imageLocation});
+                    }).then((value) => {
+                        this.replySuccess(reply, metaData.imageLocation, value)
+                    }).catch((err) => {
+                        return reply(this.boom.badRequest(err));
+                    });
             });
     };
 
@@ -382,7 +416,7 @@ class Trip {
     };
 
     /**
-     * reply a success message.
+     * reply a success message for uploading a picture.
      *
      * @param reply
      * @param imageLocation
@@ -406,6 +440,7 @@ class Trip {
 
         // get user id from authentication credentials
         request.payload.userid = request.auth.credentials._id;
+        request.payload.type = 'trip';
 
         this.db.createTrip(request.payload, (err, data) => {
             if (err) {
@@ -422,11 +457,12 @@ class Trip {
      * @param reply
      */
     private updateTrip = (request, reply) => {
-        this.db.updateTrip(request.payload._id, request.payload, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            reply(data);
+        this.isItMyTrip(request.auth.credentials._id, request.params.tripid).then(() => {
+            return this.db.updateTrip(request.params.tripid, request.payload)
+        }).then((data) => {
+            return reply(data);
+        }).catch((err) => {
+            return reply(this.boom.badRequest(err));
         });
     };
 
@@ -439,6 +475,30 @@ class Trip {
     private getTrips = (request, reply) => {
         var paginationOptions = this.getPaginationOption(request);
         this.db.getTrips({limit: paginationOptions.page_size, skip: paginationOptions.offset}, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
+    private getTripsOfUser = (request, reply) => {
+        this.db.getUserTrips(request.params.userid, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
+    /**
+     * Retrieve all trips from this user
+     *
+     * @param request
+     * @param reply
+     */
+    private getMyTrips = (request, reply) => {
+        this.db.getUserTrips(request.auth.credentials._id, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
@@ -468,12 +528,11 @@ class Trip {
      * @param reply
      */
     private deleteTripById = (request, reply) => {
-        this.db.deleteTripById(request.params.tripid, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            reply(data);
-        });
+        this.isItMyTrip(request.auth.credentials._id, request.params.tripid).then(() => {
+            return this.db.deleteTripById(request.params.tripid)
+        }).then((data) => {
+            return reply(data);
+        }).catch(err => reply(err));
     };
 
     /**
@@ -485,7 +544,7 @@ class Trip {
     private createSearchView = (request, reply) => {
         this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
             if (err) {
-                return reply(this.boom.wrap(err, 400));
+                return reply(this.boom.badRequest(err));
             } else {
                 reply(msg);
             }
@@ -553,4 +612,28 @@ class Trip {
             offset = (page - 1) * page_size;
         return {page_size: page_size, offset: offset};
     };
+
+    /**
+     * Utility method for checking if the given userid belongs to the given tripid
+     * @param userid
+     * @param tripid
+     * @returns {Promise|Promise<T>}
+     */
+    private isItMyTrip(userid:string, tripid:string):any {
+        return new Promise((reject, resolve) => {
+
+            this.db.getTripById(tripid, (err, data) => {
+
+                if (err) {
+                    return reject(this.boom.badRequest(err));
+                }
+
+                if (data.userid !== userid) {
+                    return reject(this.boom.forbidden());
+                }
+
+                return resolve(data);
+            });
+        });
+    }
 }

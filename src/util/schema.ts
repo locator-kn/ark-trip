@@ -6,7 +6,7 @@ class Schema {
     public tripSchemaPUT:any;
     public imageSchemaPost:any;
     public imageSchemaPut:any;
-    basicImageSchema:any;
+    private basicImageSchema:any;
     private hoek:any;
 
     constructor() {
@@ -22,44 +22,49 @@ class Schema {
      *    We need two schemas because PUT required '_id' and '_rev'.
      */
     private initSchemas():void {
-        // basic trip schema
-        var trip = this.joi.object().keys({
-            title: this.joi.string().required(),
-            description: this.joi.string().required(),
-            description_money: this.joi.string(),
+
+        // optional trip schema document
+        var tripSchema = this.joi.object().keys({
+            title: this.joi.string(),
+
             city: this.joi.object().keys({
                 title: this.joi.string().required(),
                 place_id: this.joi.string().required(),
                 id: this.joi.string().required()
             }),
-            start_date: this.joi.date(),
-            end_date: this.joi.date(),
-            accommodation: this.joi.boolean().required(),
+
+            description: this.joi.string(),
+
+            // if equipment is provided, this key must be true
+            accommodation: this.joi.when('accommodation_equipment', {
+                is: this.joi.array().required(),
+                then: this.joi.valid(true).required(),
+                otherwise: this.joi.boolean()
+            }),
             accommodation_equipment: this.joi.array(),
+
+            start_date: this.joi.date().min('now'),
+            end_date: this.joi.date().min(this.joi.ref('start_date')),
+
+            persons: this.joi.number().integer().min(1),
+
+            // TODO: validate max days : https://github.com/hapijs/joi/issues/667
+            days: this.joi.number().integer().min(1),
+
+            // optional keys upon creation
+            description_money: this.joi.string(),
             moods: this.joi.array(),
-
-
             locations: this.joi.array(),
-
-            // TODO: required?
-            persons: this.joi.number().integer(),
-
-            // TODO: Frontend?
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false),
-
-            // TODO: needed? Route itself is sufficient
-            type: this.joi.string().required().valid('trip')
         });
 
-        // required elements for PUT method.
-        var putMethodElements = this.joi.object().keys({
-            _id: this.joi.string().required(),
-            _rev: this.joi.string().required()
-        });
+        var requiredSchema = tripSchema.requiredKeys('title', 'city', 'description',
+            'start_date', 'end_date', 'persons', 'days', 'accommodation');
 
-        this.tripSchemaPost = trip;
-        this.tripSchemaPUT = putMethodElements.concat(trip);
+        // exported schemas
+        this.tripSchemaPUT = tripSchema.required().min(1).description('Update Trip JSON object');
+        this.tripSchemaPost = requiredSchema.required().description('Trip JSON object');
 
         // images validation
         this.imageSchemaPost = this.hoek.clone(this.imageValidation.basicImageSchema);
