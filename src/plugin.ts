@@ -492,12 +492,11 @@ class Trip {
      * @param reply
      */
     private deleteTripById = (request, reply) => {
-        this.db.deleteTripById(request.params.tripid, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            reply(data);
-        });
+        this.isItMyTrip(request.auth.credentials._id, request.params.tripid).then(() => {
+            return this.db.deleteTripById(request.params.tripid)
+        }).then((data) => {
+            return reply(data);
+        }).catch(err => reply(err));
     };
 
     /**
@@ -538,7 +537,7 @@ class Trip {
         };
         this.db.searchTripsByQuery(query, (err, data)=> {
             if (err) {
-                return reply(this.boom.wrap(err, 400));
+                return reply(this.boom.badRequest(err));
             }
             this._.sortBy(data, 'relevance');
             reply(this.getPaginatedItems(request, data));
