@@ -116,6 +116,24 @@ class Trip {
             }
         });
 
+        // get a particular trip
+        server.route({
+            method: 'GET',
+            path: '/trips/{tripid}',
+            config: {
+                auth: false,
+                handler: this.getTripById,
+                description: 'Get particular trip by id',
+                notes: 'sample call: /trips/1222123132',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string().required()
+                    }
+                }
+            }
+        });
+
         server.route({
             method: 'GET',
             path: '/users/{userid}/trips{opt}', //TODO evaluate given options
@@ -176,8 +194,7 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
                 },
@@ -201,8 +218,7 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
                 },
@@ -231,27 +247,7 @@ class Trip {
                 plugins: swaggerUpload
             }
         });
-
-
-        // get a particular trip
-        server.route({
-            method: 'GET',
-            path: '/trips/{tripid}',
-            config: {
-                auth: false,
-                handler: this.getTripById,
-                description: 'Get particular trip by id',
-                notes: 'sample call: /trips/1222123132',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required()
-                    }
-                }
-
-            }
-        });
+        
 
         // create a new trip
         server.route({
@@ -339,8 +335,7 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     }
                 }
             }
