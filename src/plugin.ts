@@ -247,7 +247,7 @@ class Trip {
                 plugins: swaggerUpload
             }
         });
-        
+
 
         // create a new trip
         server.route({
@@ -320,7 +320,6 @@ class Trip {
                     },
                     payload: this.schema.tripSchemaPUT
                 }
-
             }
         });
 
@@ -353,41 +352,46 @@ class Trip {
      */
     private savePicture = (request, reply, name) => {
 
-        // set name of file, if not defined
-        if (!name) {
-            name = request.payload.nameOfTrip + '-trip'
-        }
-
-        // extract only needed information of the request object
-        var stripped = this.imageUtil.stripHapiRequestObject(request);
-
-        // set the trip, where the picture should be saved
-        stripped.options.id = request.params.tripid;
-
-        // create object for processing images
-        var imageProcessor = this.imageUtil.processor(stripped.options);
-        if (imageProcessor.error) {
-            console.log(imageProcessor);
-            return reply(this.boom.badRequest(imageProcessor.error))
-        }
-
-        // get info needed for output or database
-        var metaData = imageProcessor.createFileInformation(name);
-
-        // create a read stream and crop it
-        var readStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
-        var thumbnailStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 120, y: 120});
-
-        this.db.savePicture(stripped.options.id, metaData.attachmentData, readStream)
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .catch((err) => reply(err))
             .then(() => {
-                metaData.attachmentData.name = metaData.thumbnailName;
-                return this.db.savePicture(stripped.options.id, metaData.attachmentData, thumbnailStream);
-            }).then(() => {
-                return this.db.updateDocument(stripped.options.id, {images: metaData.imageLocation});
-            }).then((value) => {
-                this.replySuccess(reply, metaData.imageLocation, value)
-            }).catch((err) => {
-                return reply(this.boom.badRequest(err));
+
+                // set name of file, if not defined
+                if (!name) {
+                    name = request.payload.nameOfTrip + '-trip'
+                }
+
+                // extract only needed information of the request object
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+
+                // set the trip, where the picture should be saved
+                stripped.options.id = request.params.tripid;
+
+                // create object for processing images
+                var imageProcessor = this.imageUtil.processor(stripped.options);
+                if (imageProcessor.error) {
+                    console.log(imageProcessor);
+                    return reply(this.boom.badRequest(imageProcessor.error))
+                }
+
+                // get info needed for output or database
+                var metaData = imageProcessor.createFileInformation(name);
+
+                // create a read stream and crop it
+                var readStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
+                var thumbnailStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 120, y: 120});
+
+                this.db.savePicture(stripped.options.id, metaData.attachmentData, readStream)
+                    .then(() => {
+                        metaData.attachmentData.name = metaData.thumbnailName;
+                        return this.db.savePicture(stripped.options.id, metaData.attachmentData, thumbnailStream);
+                    }).then(() => {
+                        return this.db.updateDocument(stripped.options.id, {images: metaData.imageLocation});
+                    }).then((value) => {
+                        this.replySuccess(reply, metaData.imageLocation, value)
+                    }).catch((err) => {
+                        return reply(this.boom.badRequest(err));
+                    });
             });
     };
 
@@ -606,6 +610,12 @@ class Trip {
         return {page_size: page_size, offset: offset};
     };
 
+    /**
+     * Utility method for checking if the given userid belongs to the given tripid
+     * @param userid
+     * @param tripid
+     * @returns {Promise|Promise<T>}
+     */
     private isItMyTrip(userid:string, tripid:string):Promise {
         return new Promise((reject, resolve) => {
 
