@@ -576,4 +576,22 @@ class Trip {
             offset = (page - 1) * page_size;
         return {page_size: page_size, offset: offset};
     };
+
+    private isItMyTrip(userid:string, tripid:string):Promise {
+        return new Promise((reject, resolve) => {
+
+            this.db.getTripById(tripid, (err, data) => {
+
+                if (err) {
+                    return reject(this.boom.badRequest(err));
+                }
+
+                if (data.userid !== userid) {
+                    return reject(this.boom.forbidden());
+                }
+
+                return resolve(data);
+            });
+        });
+    }
 }
