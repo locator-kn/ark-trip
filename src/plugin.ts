@@ -98,9 +98,8 @@ class Trip {
 
         server.route({
             method: 'GET',
-            path: '/trips/my/trips',
+            path: '/users/my/trips',
             config: {
-                auth: false,
                 handler: this.getMyTrips,
                 description: 'Get all my trips',
                 tags: ['api', 'trip']
