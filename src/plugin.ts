@@ -108,6 +108,16 @@ class Trip {
 
         server.route({
             method: 'GET',
+            path: '/users/my/trips/{tripid}',
+            config: {
+                handler: this.getTripById,
+                description: 'Get a specific trip. Results in the same as calling GET /trips/:tripId.',
+                tags: ['api', 'trip']
+            }
+        });
+
+        server.route({
+            method: 'GET',
             path: '/users/{userid}/trips{opt}', //TODO evaluate given options
             config: {
                 auth: false,
