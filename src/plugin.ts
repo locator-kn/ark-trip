@@ -149,6 +149,9 @@ class Trip {
                 validate: {
                     params: {
                         userid: this.joi.string().required()
+                    },
+                    query: {
+                        date: this.joi.date()
                     }
                 }
             }
@@ -192,7 +195,7 @@ class Trip {
             path: '/trips/{tripid}/picture',
             config: {
                 payload: imagePayload,
-                handler: this.savePicture,
+                handler: this.mainPicture,
                 description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
@@ -212,11 +215,7 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 payload: imagePayload,
-                handler: (request, reply) => {
-                    // create image with random uuid
-                    // TODO: think of a better approach
-                    this.savePicture(request, reply, this.uuid.v4())
-                },
+                handler: this.otherTripPicture,
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
                 tags: ['api', 'trip'],
@@ -273,19 +272,7 @@ class Trip {
             config: {
                 payload: imagePayload,
                 handler: (request, reply) => {
-                    // create an empty "preTrip" before uploading a picture
-                    this.db.createTrip({type: "preTrip"}, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        // add the generated id from database to the request object
-                        request.params.tripid = data.id;
-                        // get user id from authentication credentials
-                        request.payload.userid = request.auth.credentials._id;
 
-                        // save picture to the just created document
-                        this.savePicture(request, reply, false);
-                    });
                 },
                 description: 'Creates a new trip with form data. Used when a picture is uploaded first',
                 tags: ['api', 'trip'],
@@ -346,74 +333,108 @@ class Trip {
         return 'register';
     }
 
-    /**
-     * Save picture.
-     *
-     * @param request
-     * @param reply
-     */
-    private savePicture = (request, reply, name) => {
-
-        // TODO: Because of performance this method must not always be called.
+    private mainPicture(request:any, reply:any):void {
         this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
             .catch((err) => reply(err))
             .then(() => {
-
-                // set name of file, if not defined
-                if (!name) {
-                    name = request.payload.nameOfTrip + '-trip'
-                }
-
-                // extract only needed information of the request object
+                var name = request.payload.nameOfTrip + '-trip';
                 var stripped = this.imageUtil.stripHapiRequestObject(request);
-
-                // set the trip, where the picture should be saved
                 stripped.options.id = request.params.tripid;
 
-                // create object for processing images
-                var imageProcessor = this.imageUtil.processor(stripped.options);
-                if (imageProcessor.error) {
-                    console.log(imageProcessor);
-                    return reply(this.boom.badRequest(imageProcessor.error))
-                }
-
-                // get info needed for output or database
-                var metaData = imageProcessor.createFileInformation(name);
-
-                // create a read stream and crop it
-                var readStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
-                var thumbnailStream = imageProcessor.createCroppedStream(stripped.cropping, {x: 120, y: 120});
-
-                this.db.savePicture(stripped.options.id, metaData.attachmentData, readStream)
-                    .then(() => {
-                        metaData.attachmentData.name = metaData.thumbnailName;
-                        return this.db.savePicture(stripped.options.id, metaData.attachmentData, thumbnailStream);
-                    }).then(() => {
-                        return this.db.updateDocument(stripped.options.id, {images: metaData.imageLocation});
-                    }).then((value) => {
-                        this.replySuccess(reply, metaData.imageLocation, value)
-                    }).catch((err) => {
-                        return reply(this.boom.badRequest(err));
-                    });
+                this.savePicture(stripped.options, stripped.cropping, name, reply)
             });
-    };
+    }
+
+
+    private otherTripPicture(request:any, reply:any):void {
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .catch((err) => reply(err))
+            .then(() => {
+                var name = this.uuid.v4();
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+                stripped.options.id = request.params.tripid;
+
+                this.savePicture(stripped.options, stripped.cropping, name, reply)
+            });
+    }
 
     /**
      * Function to update picture.
      * @param request
      * @param reply
      */
-    private updatePicture = (request, reply) => {
-        // check first if entry exist in the database
-        var file = request.payload.nameOfFile;
-        this.db.entryExist(request.params.tripid, file)
-            .catch((err) => {
-                return reply(this.boom.badRequest(err));
+    private updatePicture(request, reply) {
+        var name = request.payload.nameOfFile;
+
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .catch((err) => reply(err))
+            .then(() => {
+                return this.db.entryExist(request.params.tripid, name)
+            })
+            .then(() => {
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+                stripped.options.id = request.params.tripid;
+
+                this.savePicture(stripped.options, stripped.cropping, name, reply)
+            });
+    }
+
+    private createTripWithPicture(request, reply) {
+        // create an empty "preTrip" before uploading a picture
+        this.db.createTrip({type: "preTrip"}, (err, data) => {
+            if (err) {
+                return reply(this.boom.wrap(err, 400));
+            }
+
+            // get user id from authentication credentials
+            request.payload.userid = request.auth.credentials._id;
+
+            var stripped = this.imageUtil.stripHapiRequestObject(request);
+            stripped.options.id = data.id;
+            name = request.payload.nameOfTrip + '-trip';
+
+            // save picture to the just created document
+            this.savePicture(stripped.options, stripped.cropping, name, reply)
+        });
+    }
+
+    /**
+     * Save picture.
+     *
+     * @param info
+     * @param cropping
+     * @param name
+     * @param reply
+     */
+    private savePicture(info:any, cropping:any, name:string, reply:any):void {
+
+        // create object for processing images
+        var imageProcessor = this.imageUtil.processor(info);
+        if (imageProcessor.error) {
+            console.log(imageProcessor);
+            return reply(this.boom.badRequest(imageProcessor.error))
+        }
+
+        // get info needed for output or database
+        var metaData = imageProcessor.createFileInformation(name);
+
+        // create a read stream and crop it
+        var readStream = imageProcessor.createCroppedStream(cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
+        var thumbnailStream = imageProcessor.createCroppedStream(cropping, {x: 120, y: 120});
+
+        this.db.savePicture(info.id, metaData.attachmentData, readStream)
+            .then(() => {
+                metaData.attachmentData.name = metaData.thumbnailName;
+                return this.db.savePicture(info.id, metaData.attachmentData, thumbnailStream);
             }).then(() => {
-                this.savePicture(request, reply, file);
+                return this.db.updateDocument(info.id, {images: metaData.imageLocation});
+            }).then((value) => {
+                this.replySuccess(reply, metaData.imageLocation, value)
+            }).catch((err) => {
+                return reply(err);
             });
 
-    };
+    }
 
     /**
      * reply a success message for uploading a picture.
