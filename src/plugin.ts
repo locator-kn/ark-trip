@@ -457,13 +457,12 @@ class Trip {
      * @param reply
      */
     private updateTrip = (request, reply) => {
-        this.isItMyTrip(request.auth.credentials._id, request.params.tripid).then(() => {
-            return this.db.updateTrip(request.params.tripid, request.payload)
-        }).then((data) => {
-            return reply(data);
-        }).catch((err) => {
-            return reply(this.boom.badRequest(err));
-        });
+        this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload)
+            .then((data) => {
+                return reply(data);
+            }).catch((err) => {
+                return reply(err);
+            });
     };
 
     /**
@@ -528,11 +527,10 @@ class Trip {
      * @param reply
      */
     private deleteTripById = (request, reply) => {
-        this.isItMyTrip(request.auth.credentials._id, request.params.tripid).then(() => {
-            return this.db.deleteTripById(request.params.tripid)
-        }).then((data) => {
-            return reply(data);
-        }).catch(err => reply(err));
+        this.db.deleteTripById(request.params.tripid, request.auth.credentials._id)
+            .then((data) => {
+                return reply(data);
+            }).catch(err => reply(err));
     };
 
     /**
