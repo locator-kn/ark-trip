@@ -105,7 +105,12 @@ class Trip {
             config: {
                 handler: this.getMyTrips,
                 description: 'Get all my trips',
-                tags: ['api', 'trip']
+                tags: ['api', 'trip'],
+                validate: {
+                    query: {
+                        date: this.joi.date()
+                    }
+                }
             }
         });
 
@@ -503,9 +508,10 @@ class Trip {
     };
 
     private getTripsOfUser = (request, reply) => {
-        this.db.getUserTrips(request.params.userid, (err, data) => {
+        var date = this.getQueryDate(request.query);
+        this.db.getUserTrips(request.params.userid, date, (err, data) => {
             if (err) {
-                return reply(this.boom.wrap(err, 400));
+                return reply(this.boom.badRequest(err));
             }
             reply(data);
         });
@@ -518,9 +524,10 @@ class Trip {
      * @param reply
      */
     private getMyTrips = (request, reply) => {
-        this.db.getUserTrips(request.auth.credentials._id, (err, data) => {
+        var date = this.getQueryDate(request.query);
+        this.db.getMyTrips(request.auth.credentials._id, date, (err, data) => {
             if (err) {
-                return reply(this.boom.wrap(err, 400));
+                return reply(this.boom.badRequest(err));
             }
             reply(data);
         });
@@ -654,5 +661,12 @@ class Trip {
                 return resolve(data);
             });
         });
+    }
+
+    private getQueryDate(query:any):Date {
+        if (!query || !query.date) {
+            return null;
+        }
+        return query.date;
     }
 }
