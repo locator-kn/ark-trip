@@ -142,7 +142,6 @@ class Trip {
             }
         });
 
-        //TODO provide the functionality to get only trips upon a certain date
         server.route({
             method: 'GET',
             path: '/users/{userid}/trips',
@@ -276,9 +275,7 @@ class Trip {
             path: '/trips/image',
             config: {
                 payload: imagePayload,
-                handler: (request, reply) => {
-
-                },
+                handler: this.createTripWithPicture,
                 description: 'Creates a new trip with form data. Used when a picture is uploaded first',
                 tags: ['api', 'trip'],
                 validate: {
@@ -340,7 +337,7 @@ class Trip {
 
     private mainPicture(request:any, reply:any):void {
         this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
-            .catch((err) => reply(err))
+            .catch(err => reply(err))
             .then(() => {
                 var name = request.payload.nameOfTrip + '-trip';
                 var stripped = this.imageUtil.stripHapiRequestObject(request);
@@ -372,16 +369,14 @@ class Trip {
         var name = request.payload.nameOfFile;
 
         this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
-            .catch((err) => reply(err))
             .then(() => {
                 return this.db.entryExist(request.params.tripid, name)
-            })
-            .then(() => {
+            }).then(() => {
                 var stripped = this.imageUtil.stripHapiRequestObject(request);
                 stripped.options.id = request.params.tripid;
 
                 this.savePicture(stripped.options, stripped.cropping, name, reply)
-            });
+            }).catch((err) => reply(err));
     }
 
     private createTripWithPicture(request, reply) {
@@ -654,7 +649,7 @@ class Trip {
                     return reject(this.boom.badRequest(err));
                 }
 
-                if (data.userid !== userid) {
+                if (!data.userid || data.userid !== userid) {
                     return reject(this.boom.forbidden());
                 }
 
