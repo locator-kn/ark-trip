@@ -427,7 +427,7 @@ class Trip {
                 metaData.attachmentData.name = metaData.thumbnailName;
                 return this.db.savePicture(info.id, metaData.attachmentData, thumbnailStream);
             }).then(() => {
-                return this.db.updateDocument(info.id, {images: metaData.imageLocation});
+                return this.db.updateDocumentWithoutCheck(info.id, {images: metaData.imageLocation});
             }).then((value) => {
                 this.replySuccess(reply, metaData.imageLocation, value)
             }).catch((err) => {
