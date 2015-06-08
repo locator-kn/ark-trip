@@ -34,6 +34,7 @@ class Schema {
             }),
 
             description: this.joi.string(),
+            locations: this.joi.array(),
 
             // if equipment is provided, this key must be true
             accommodation: this.joi.when('accommodation_equipment', {
@@ -54,13 +55,12 @@ class Schema {
             // optional keys upon creation
             description_money: this.joi.string(),
             moods: this.joi.array(),
-            locations: this.joi.array(),
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false),
         });
 
         var requiredSchema = tripSchema.requiredKeys('title', 'city', 'description',
-            'start_date', 'end_date', 'persons', 'days', 'accommodation');
+            'start_date', 'end_date', 'persons', 'days', 'accommodation', 'locations');
 
         // exported schemas
         this.tripSchemaPUT = tripSchema.required().min(1).description('Update Trip JSON object');
