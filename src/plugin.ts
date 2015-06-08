@@ -381,13 +381,14 @@ class Trip {
 
     private createTripWithPicture(request, reply) {
         // create an empty "preTrip" before uploading a picture
-        this.db.createTrip({type: "preTrip"}, (err, data) => {
+        var userid = request.auth.credentials._id;
+        this.db.createTrip({type: "preTrip", userid: userid}, (err, data) => {
             if (err) {
-                return reply(this.boom.wrap(err, 400));
+                return reply(this.boom.badRequest(err));
             }
 
             // get user id from authentication credentials
-            request.payload.userid = request.auth.credentials._id;
+            request.payload.userid = userid;
 
             var stripped = this.imageUtil.stripHapiRequestObject(request);
             stripped.options.id = data.id;
