@@ -38,7 +38,7 @@ class Schema {
 
             // if equipment is provided, this key must be true
             accommodation: this.joi.when('accommodation_equipment', {
-                is: this.joi.array().required(),
+                is: this.joi.array().length(1).required(),
                 then: this.joi.valid(true).required(),
                 otherwise: this.joi.boolean()
             }),
