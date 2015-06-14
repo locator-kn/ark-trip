@@ -1,6 +1,7 @@
 declare var Promise:any;
 
 import Schema from './util/schema';
+import {setup} from './setup';
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -33,6 +34,15 @@ class Trip {
         this.regex = require('locator-image-utility').regex;
         this.uuid = require('node-uuid');
 
+    }
+
+    /**
+     * Setup method for initializing the search algo for searching a trip.
+     * @param database
+     * @param callback
+     */
+    public setup(database:any, callback:any) {
+        setup(database, callback);
     }
 
 
