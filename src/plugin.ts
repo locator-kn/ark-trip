@@ -2,6 +2,7 @@ declare var Promise:any;
 
 import Schema from './util/schema';
 import {setup} from './setup';
+import Search from './util/search';
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -15,6 +16,7 @@ class Trip {
     joi:any;
     _:any; // underscore.js
     schema:any;
+    search:any;
     paginationDefaultSize:number = 10;
     imageUtil:any;
     uuid:any;
@@ -33,6 +35,7 @@ class Trip {
         this.imageUtil = require('locator-image-utility').image;
         this.regex = require('locator-image-utility').regex;
         this.uuid = require('node-uuid');
+        this.search = new Search();
 
     }
 
@@ -41,8 +44,8 @@ class Trip {
      * @param database
      * @param callback
      */
-    public setup(database:any, callback:any) {
-        setup(database, callback);
+    public getSetupData() {
+        return ({key: this.search.viewName_Search, value:this.search.searchList});
     }
 
 
