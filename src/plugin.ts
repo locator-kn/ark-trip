@@ -408,7 +408,6 @@ class Trip {
         // create object for processing images
         var imageProcessor = this.imageUtil.processor(info);
         if (imageProcessor.error) {
-            console.log(imageProcessor);
             return reply(this.boom.badRequest(imageProcessor.error))
         }
 
