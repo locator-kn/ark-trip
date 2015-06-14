@@ -1,7 +1,6 @@
 declare var Promise:any;
 
 import Schema from './util/schema';
-import {setup} from './setup';
 import Search from './util/search';
 
 export interface IRegister {
@@ -45,7 +44,7 @@ class Trip {
      * @param callback
      */
     public getSetupData() {
-        return ({key: this.search.viewName_Search, value:this.search.searchList});
+        return ({key: this.search.viewName_Search, value: this.search.searchList});
     }
 
 
