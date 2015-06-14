@@ -1,7 +1,5 @@
-declare
-var Promise:any;
+declare var Promise:any;
 
-import Search from './util/search';
 import Schema from './util/schema';
 
 export interface IRegister {
@@ -14,8 +12,6 @@ class Trip {
     db:any;
     boom:any;
     joi:any;
-    gm:any;
-    search:any;
     _:any; // underscore.js
     schema:any;
     paginationDefaultSize:number = 10;
@@ -33,7 +29,6 @@ class Trip {
         this.joi = require('joi');
         this._ = require('underscore');
         this.schema = new Schema();
-        this.search = new Search();
         this.imageUtil = require('locator-image-utility').image;
         this.regex = require('locator-image-utility').regex;
         this.uuid = require('node-uuid');
@@ -320,17 +315,6 @@ class Trip {
             }
         });
 
-        // create the views for couchdb
-        server.route({
-            method: 'POST',
-            path: '/trips/setup',
-            config: {
-                handler: this.createSearchView,
-                description: 'Setup all views and lists for couchdb',
-                tags: ['api', 'trip']
-            }
-        });
-
         // Register
         return 'register';
     }
@@ -555,22 +539,6 @@ class Trip {
             .then((data) => {
                 return reply(data);
             }).catch(err => reply(err));
-    };
-
-    /**
-     * Create or update view with search functionality, locatoed in /util/search.
-     *
-     * @param request
-     * @param reply
-     */
-    private createSearchView = (request, reply) => {
-        this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
-            if (err) {
-                return reply(this.boom.badRequest(err));
-            } else {
-                reply(msg);
-            }
-        });
     };
 
     /**
