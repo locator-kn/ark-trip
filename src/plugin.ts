@@ -1,8 +1,7 @@
-declare
-var Promise:any;
+declare var Promise:any;
 
-import Search from './util/search';
 import Schema from './util/schema';
+import Search from './util/search';
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -14,10 +13,9 @@ class Trip {
     db:any;
     boom:any;
     joi:any;
-    gm:any;
-    search:any;
     _:any; // underscore.js
     schema:any;
+    search:any;
     paginationDefaultSize:number = 10;
     imageUtil:any;
     uuid:any;
@@ -33,11 +31,20 @@ class Trip {
         this.joi = require('joi');
         this._ = require('underscore');
         this.schema = new Schema();
-        this.search = new Search();
         this.imageUtil = require('locator-image-utility').image;
         this.regex = require('locator-image-utility').regex;
         this.uuid = require('node-uuid');
+        this.search = new Search();
 
+    }
+
+    /**
+     * Setup method for initializing the search algo for searching a trip.
+     * @param database
+     * @param callback
+     */
+    public getSetupData() {
+        return ({key: this.search.viewName_Search, value: this.search.searchList});
     }
 
 
@@ -320,17 +327,6 @@ class Trip {
             }
         });
 
-        // create the views for couchdb
-        server.route({
-            method: 'POST',
-            path: '/trips/setup',
-            config: {
-                handler: this.createSearchView,
-                description: 'Setup all views and lists for couchdb',
-                tags: ['api', 'trip']
-            }
-        });
-
         // Register
         return 'register';
     }
@@ -555,22 +551,6 @@ class Trip {
             .then((data) => {
                 return reply(data);
             }).catch(err => reply(err));
-    };
-
-    /**
-     * Create or update view with search functionality, locatoed in /util/search.
-     *
-     * @param request
-     * @param reply
-     */
-    private createSearchView = (request, reply) => {
-        this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
-            if (err) {
-                return reply(this.boom.badRequest(err));
-            } else {
-                reply(msg);
-            }
-        });
     };
 
     /**
