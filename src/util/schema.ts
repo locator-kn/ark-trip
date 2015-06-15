@@ -56,7 +56,7 @@ class Schema {
             description_money: this.joi.string(),
             moods: this.joi.array(),
             active: this.joi.boolean().default(true),
-            delete: this.joi.boolean().default(false),
+            delete: this.joi.boolean().default(false)
         });
 
         var requiredSchema = tripSchema.requiredKeys('title', 'city', 'description',

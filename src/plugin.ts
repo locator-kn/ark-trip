@@ -378,7 +378,8 @@ class Trip {
     private createTripWithPicture(request, reply) {
         // create an empty "preTrip" before uploading a picture
         var userid = request.auth.credentials._id;
-        this.db.createTrip({type: "preTrip", userid: userid}, (err, data) => {
+        var username = request.auth.credentials.name;
+        this.db.createTrip({type: "preTrip", userid: userid, username: username}, (err, data) => {
             if (err) {
                 return reply(this.boom.badRequest(err));
             }
@@ -408,7 +409,6 @@ class Trip {
         // create object for processing images
         var imageProcessor = this.imageUtil.processor(info);
         if (imageProcessor.error) {
-            console.log(imageProcessor);
             return reply(this.boom.badRequest(imageProcessor.error))
         }
 
@@ -458,6 +458,7 @@ class Trip {
 
         // get user id from authentication credentials
         request.payload.userid = request.auth.credentials._id;
+        request.payload.username = request.auth.credentials.name;
         request.payload.type = 'trip';
 
         this.db.createTrip(request.payload, (err, data) => {
