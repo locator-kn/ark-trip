@@ -52,13 +52,9 @@ class Schema {
             // TODO: validate max days : https://github.com/hapijs/joi/issues/667
             days: this.joi.number().integer().min(1),
 
-            // user
-            userid: this.joi.string(),
-            username: this.joi.string(),
-
             // optional keys upon creation
             description_money: this.joi.string(),
-            moods: this.joi.array(),
+            moods: this.joi.array().max(3),
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false)
         });
