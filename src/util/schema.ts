@@ -54,7 +54,7 @@ class Schema {
 
             // optional keys upon creation
             description_money: this.joi.string(),
-            moods: this.joi.array().max(3),
+            moods: this.joi.array(),
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false)
         });
