@@ -1,6 +1,6 @@
 {
   "name": "ark-trip",
-  "version": "4.0.0",
+  "version": "6.1.0",
   "description": "Plugin to handle trips",
   "main": "index.js",
   "scripts": {
@@ -31,9 +31,10 @@
   "dependencies": {
     "boom": "^2.7.1",
     "gm": "^1.17.0",
-    "hoek": "^2.13.0",
+    "hoek": "^2.14.0",
     "joi": "^6.2.0",
-    "locators-regex": "0.0.1",
+    "locator-image-utility": "latest",
+    "node-uuid": "^1.4.3",
     "sinon": "^1.14.1",
     "typescript": "^1.5.0-alpha",
     "underscore": "^1.8.3"

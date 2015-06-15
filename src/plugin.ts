@@ -1,5 +1,7 @@
-import Search from './util/search';
+declare var Promise:any;
+
 import Schema from './util/schema';
+import Search from './util/search';
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -11,11 +13,13 @@ class Trip {
     db:any;
     boom:any;
     joi:any;
-    gm:any;
-    search:any;
     _:any; // underscore.js
     schema:any;
+    search:any;
     paginationDefaultSize:number = 10;
+    imageUtil:any;
+    uuid:any;
+    regex:any;
 
 
     constructor() {
@@ -25,10 +29,22 @@ class Trip {
 
         this.boom = require('boom');
         this.joi = require('joi');
-        this.gm = require('gm').subClass({imageMagick: true});
         this._ = require('underscore');
         this.schema = new Schema();
+        this.imageUtil = require('locator-image-utility').image;
+        this.regex = require('locator-image-utility').regex;
+        this.uuid = require('node-uuid');
         this.search = new Search();
+
+    }
+
+    /**
+     * Setup method for initializing the search algo for searching a trip.
+     * @param database
+     * @param callback
+     */
+    public getSetupData() {
+        return ({key: this.search.viewName_Search, value: this.search.searchList});
     }
 
 
@@ -52,6 +68,12 @@ class Trip {
             allow: 'multipart/form-data',
             // TODO: evaluate real value
             maxBytes: 1048576 * 6 // 6MB
+        };
+
+        var swaggerUpload = {
+            'hapi-swagger': {
+                payloadType: 'form'
+            }
         };
 
         // get all trips
@@ -84,7 +106,69 @@ class Trip {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/users/my/trips',
+            config: {
+                handler: this.getMyTrips,
+                description: 'Get all my trips',
+                tags: ['api', 'trip'],
+                validate: {
+                    query: {
+                        date: this.joi.date()
+                    }
+                }
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/users/my/trips/{tripid}',
+            config: {
+                handler: this.getTripById,
+                description: 'Get a specific trip. Results in the same as calling GET /trips/:tripId.',
+                tags: ['api', 'trip']
+            }
+        });
+
+        // get a particular trip
+        server.route({
+            method: 'GET',
+            path: '/trips/{tripid}',
+            config: {
+                auth: false,
+                handler: this.getTripById,
+                description: 'Get particular trip by id',
+                notes: 'sample call: /trips/1222123132',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string().required()
+                    }
+                }
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/users/{userid}/trips',
+            config: {
+                auth: false,
+                handler: this.getTripsOfUser,
+                description: 'Get all trips of this specific user',
+                tags: ['api', 'trip', 'user'],
+                validate: {
+                    params: {
+                        userid: this.joi.string().required()
+                    },
+                    query: {
+                        date: this.joi.date()
+                    }
+                }
+            }
+        });
         // get a (one of optional many) picture of a particular trip
+        // TODO: redirect it to one special route handling pictures
         server.route({
             method: 'GET',
             path: '/trips/{tripid}/{name}.{ext}',
@@ -109,7 +193,7 @@ class Trip {
                         name: this.joi.string()
                             .required(),
                         ext: this.joi.string()
-                            .required().regex(this.schema.regex.imageExtension)
+                            .required().regex(this.regex.imageExtension)
                     }
                 }
 
@@ -121,19 +205,18 @@ class Trip {
             method: ['PUT', 'POST'],
             path: '/trips/{tripid}/picture',
             config: {
-                auth: false,
                 payload: imagePayload,
-                handler: this.savePicture,
+                handler: this.mainPicture,
                 description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -142,19 +225,18 @@ class Trip {
             method: 'POST',
             path: '/trips/{tripid}/picture/more',
             config: {
-                auth: false,
                 payload: imagePayload,
-                handler: this.savePicture,
+                handler: this.otherTripPicture,
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -163,7 +245,6 @@ class Trip {
             method: 'PUT',
             path: '/trips/{tripid}/picture/more',
             config: {
-                auth: false,
                 payload: imagePayload,
                 handler: this.updatePicture,
                 description: 'Update/Change one of the pictures of a particular trip',
@@ -175,30 +256,11 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPut
-                }
+                },
+                plugins: swaggerUpload
             }
         });
 
-
-        // get a particular trip
-        server.route({
-            method: 'GET',
-            path: '/trips/{tripid}',
-            config: {
-                auth: false,
-                handler: this.getTripById,
-                description: 'Get particular trip by id',
-                notes: 'sample call: /trips/1222123132',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required()
-                    }
-                }
-
-            }
-        });
 
         // create a new trip
         server.route({
@@ -210,8 +272,6 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.tripSchemaPost
-                        .required()
-                        .description('Trip JSON object')
                 }
             }
         });
@@ -222,37 +282,15 @@ class Trip {
             path: '/trips/image',
             config: {
                 payload: imagePayload,
-                handler: (request, reply) => {
-                    // create an empty trip before uploading a picture
-                    this.db.createTrip({type: "preTrip"}, (err, data) => {
-                        if (err) {
-                            return reply(this.boom.wrap(err, 400));
-                        }
-                        // add the generated id from database to the request object
-                        request.params.tripid = data.id;
-
-                        // save picture to the just created document
-                        this.savePicture(request, reply, false);
-                    });
-                },
+                handler: this.createTripWithPicture,
                 description: 'Creates a new trip with form data. Used when a picture is uploaded first',
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.imageSchemaPost
-                }
+                },
+                plugins: swaggerUpload
             }
 
-        });
-
-        // create the views for couchdb
-        server.route({
-            method: 'POST',
-            path: '/trips/setup',
-            config: {
-                handler: this.createSearchView,
-                description: 'Setup all views and lists for couchdb',
-                tags: ['api', 'trip']
-            }
         });
 
         // update a particular trip
@@ -269,13 +307,9 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.tripSchemaPUT
-                        .required()
-                        .description('Trip JSON object')
                 }
-
             }
         });
-
 
         // delete a particular trip
         server.route({
@@ -283,12 +317,11 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 handler: this.deleteTripById,
-                description: 'delete a particular trip',
+                description: 'delete a particular trip. Note this user must be owner of this trip',
                 tags: ['api', 'trip'],
                 validate: {
                     params: {
-                        tripid: this.joi.string()
-                            .required()
+                        tripid: this.joi.string().required()
                     }
                 }
             }
@@ -298,120 +331,110 @@ class Trip {
         return 'register';
     }
 
-    /**
-     * Function to get file information for a file, from a request.
-     *
-     * @param request
-     * @returns {{ext: string, filename: string, thumbname: string, url: string, thumbURL: string, imageLocation: {}}}
-     */
-    private getFileInformation(request:any, originalName) {
-        var file = {
-            ext: '',
-            filename: '',
-            thumbname: '',
-            url: '',
-            thumbURL: '',
-            imageLocation: {}
-        };
+    private mainPicture(request:any, reply:any):void {
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .catch(err => reply(err))
+            .then(() => {
+                var name = request.payload.nameOfTrip + '-trip';
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+                stripped.options.id = request.params.tripid;
 
-        file.ext = request.payload.file.hapi.headers['content-type']
-            .match(this.schema.regex.imageExtension);
-
-        if (originalName) {
-            // file, which will be updated
-            var _file = request.payload.nameOfFile.split('.')[0];
-            file.filename = _file + '.' + file.ext;
-            file.thumbname = _file + '-thumb.' + file.ext;
-        } else {
-            // file, which will be updated
-            file.filename = request.payload.nameOfTrip + '-trip.' + file.ext;
-            file.thumbname = request.payload.nameOfTrip + '-trip-thumb.' + file.ext;
-        }
-
-
-        // "/i/" will be mapped to /api/vX/ from nginx
-        file.url = '/i/trips/' + request.params.tripid + '/' + file.filename;
-        file.thumbURL = '/i/trips/' + request.params.tripid + '/' + file.thumbname;
-
-        file.imageLocation = {
-            picture: file.url,
-            thumbnail: file.thumbURL
-        };
-        return file;
+                this.savePicture(stripped.options, stripped.cropping, name, reply)
+            });
     }
 
-    /**
-     * Save picture.
-     *
-     * @param request
-     * @param reply
-     */
-    private savePicture = (request, reply, originalName) => {
 
-        var file = this.getFileInformation(request, originalName);
-
-        var attachmentData = {
-            'Content-Type': request.payload.file.hapi.headers['content-type'],
-            name: file.filename
-        };
-
-        // create a read stream and crop it
-        // TODO: size needs to be discussed
-        var readStream = this.crop(request, 1500, 675);
-        var thumbnailStream = this.crop(request, 120, 120);
-
-        this.db.savePicture(request.params.tripid, attachmentData, readStream)
+    private otherTripPicture(request:any, reply:any):void {
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .catch((err) => reply(err))
             .then(() => {
-                attachmentData.name = file.thumbname;
-                return this.db.savePicture(request.params.tripid, attachmentData, thumbnailStream);
-            }).then(() => {
-                return this.db.updateDocument(request.params.tripid, {images: file.imageLocation});
-            })
-            .then((value) => {
-                this.replySuccess(reply, file.imageLocation, value)
-            })
-            .catch((err) => {
-                return reply(this.boom.badRequest(err));
-            });
+                var name = this.uuid.v4();
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+                stripped.options.id = request.params.tripid;
 
-    };
+                this.savePicture(stripped.options, stripped.cropping, name, reply)
+            });
+    }
 
     /**
      * Function to update picture.
      * @param request
      * @param reply
      */
-    private updatePicture = (request, reply) => {
-        // check first if entry exist in the database
-        this.db.entryExist(request.params.tripid, request.payload.nameOfFile)
-            .catch((err) => {
-                return reply(this.boom.badRequest(err));
+    private updatePicture(request, reply) {
+        var name = request.payload.nameOfFile;
+
+        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
+            .then(() => {
+                return this.db.entryExist(request.params.tripid, name)
             }).then(() => {
-                this.savePicture(request, reply, true);
-            });
+                var stripped = this.imageUtil.stripHapiRequestObject(request);
+                stripped.options.id = request.params.tripid;
 
-    };
+                this.savePicture(stripped.options, stripped.cropping, name, reply)
+            }).catch((err) => reply(err));
+    }
 
-    /**
-     * Crop a payload file and return a stream.
-     *
-     * @param request
-     * @param x
-     * @param y
-     * @returns {any}
-     */
-    private crop(request, x, y) {
-        return this.gm(request.payload.file)
-            .crop(request.payload.width,
-            request.payload.height,
-            request.payload.xCoord,
-            request.payload.yCoord)
-            .resize(x, y)
-            .stream();
+    private createTripWithPicture(request, reply) {
+        // create an empty "preTrip" before uploading a picture
+        var userid = request.auth.credentials._id;
+        this.db.createTrip({type: "preTrip", userid: userid}, (err, data) => {
+            if (err) {
+                return reply(this.boom.badRequest(err));
+            }
+
+            // get user id from authentication credentials
+            request.payload.userid = userid;
+
+            var stripped = this.imageUtil.stripHapiRequestObject(request);
+            stripped.options.id = data.id;
+            name = request.payload.nameOfTrip + '-trip';
+
+            // save picture to the just created document
+            this.savePicture(stripped.options, stripped.cropping, name, reply)
+        });
     }
 
     /**
-     * reply a success message.
+     * Save picture.
+     *
+     * @param info
+     * @param cropping
+     * @param name
+     * @param reply
+     */
+    private savePicture(info:any, cropping:any, name:string, reply:any):void {
+
+        // create object for processing images
+        var imageProcessor = this.imageUtil.processor(info);
+        if (imageProcessor.error) {
+            console.log(imageProcessor);
+            return reply(this.boom.badRequest(imageProcessor.error))
+        }
+
+        // get info needed for output or database
+        var metaData = imageProcessor.createFileInformation(name);
+
+        // create a read stream and crop it
+        var readStream = imageProcessor.createCroppedStream(cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
+        var thumbnailStream = imageProcessor.createCroppedStream(cropping, {x: 120, y: 120});
+
+        this.db.savePicture(info.id, metaData.attachmentData, readStream)
+            .then(() => {
+                metaData.attachmentData.name = metaData.thumbnailName;
+                return this.db.savePicture(info.id, metaData.attachmentData, thumbnailStream);
+            }).then(() => {
+                return this.db.updateDocumentWithoutCheck(info.id, {images: metaData.imageLocation});
+            }).then((value) => {
+                this.replySuccess(reply, metaData.imageLocation, value)
+            }).catch((err) => {
+                return reply(err);
+            });
+
+    }
+
+    /**
+     * reply a success message for uploading a picture.
      *
      * @param reply
      * @param imageLocation
@@ -432,12 +455,16 @@ class Trip {
      * @param reply
      */
     private createTrip = (request, reply) => {
-        // TODO: read user id from session and create trip with this info
+
+        // get user id from authentication credentials
+        request.payload.userid = request.auth.credentials._id;
+        request.payload.type = 'trip';
+
         this.db.createTrip(request.payload, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
-            reply(data);
+            return reply(data);
         });
     };
 
@@ -448,12 +475,12 @@ class Trip {
      * @param reply
      */
     private updateTrip = (request, reply) => {
-        this.db.updateTrip(request.payload._id, request.payload, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            reply(data);
-        });
+        this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload)
+            .then((data) => {
+                return reply(data);
+            }).catch((err) => {
+                return reply(err);
+            });
     };
 
     /**
@@ -467,6 +494,32 @@ class Trip {
         this.db.getTrips({limit: paginationOptions.page_size, skip: paginationOptions.offset}, (err, data) => {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
+            }
+            reply(data);
+        });
+    };
+
+    private getTripsOfUser = (request, reply) => {
+        var date = this.getQueryDate(request.query);
+        this.db.getUserTrips(request.params.userid, date, (err, data) => {
+            if (err) {
+                return reply(this.boom.badRequest(err));
+            }
+            reply(data);
+        });
+    };
+
+    /**
+     * Retrieve all trips from this user
+     *
+     * @param request
+     * @param reply
+     */
+    private getMyTrips = (request, reply) => {
+        var date = this.getQueryDate(request.query);
+        this.db.getMyTrips(request.auth.credentials._id, date, (err, data) => {
+            if (err) {
+                return reply(this.boom.badRequest(err));
             }
             reply(data);
         });
@@ -494,28 +547,10 @@ class Trip {
      * @param reply
      */
     private deleteTripById = (request, reply) => {
-        this.db.deleteTripById(request.params.tripid, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            reply(data);
-        });
-    };
-
-    /**
-     * Create or update view with search functionality, locatoed in /util/search.
-     *
-     * @param request
-     * @param reply
-     */
-    private createSearchView = (request, reply) => {
-        this.db.createView(this.search.viewName_Search, this.search.searchList, (err, msg)=> {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            } else {
-                reply(msg);
-            }
-        });
+        this.db.deleteTripById(request.params.tripid, request.auth.credentials._id)
+            .then((data) => {
+                return reply(data);
+            }).catch(err => reply(err));
     };
 
     /**
@@ -579,4 +614,35 @@ class Trip {
             offset = (page - 1) * page_size;
         return {page_size: page_size, offset: offset};
     };
+
+    /**
+     * Utility method for checking if the given userid belongs to the given tripid
+     * @param userid
+     * @param tripid
+     * @returns {Promise|Promise<T>}
+     */
+    private isItMyTrip(userid:string, tripid:string):any {
+        return new Promise((reject, resolve) => {
+
+            this.db.getTripById(tripid, (err, data) => {
+
+                if (err) {
+                    return reject(this.boom.badRequest(err));
+                }
+
+                if (!data.userid || data.userid !== userid) {
+                    return reject(this.boom.forbidden());
+                }
+
+                return resolve(data);
+            });
+        });
+    }
+
+    private getQueryDate(query:any):Date {
+        if (!query || !query.date) {
+            return null;
+        }
+        return query.date;
+    }
 }
