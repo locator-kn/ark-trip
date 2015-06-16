@@ -578,8 +578,20 @@ class Trip {
             if (err) {
                 return reply(this.boom.wrap(err, 400));
             }
-            this._.sortBy(data, 'relevance');
-            reply(this.getPaginatedItems(request, data));
+            // if trips with query params found
+            if (data.length > 0) {
+                this._.sortBy(data, 'relevance');
+                reply(this.getPaginatedItems(request, data));
+            } else {
+                // if no trips found return all trips of city
+                this.db.getTripsByCity(query.city, (err, data) => {
+                    if (err) {
+                        return reply(this.boom.wrap(err, 400));
+                    }
+                    reply(this.getPaginatedItems(request, data));
+                })
+            }
+
         });
     }
 
