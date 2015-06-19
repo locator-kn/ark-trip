@@ -76,7 +76,7 @@ class Trip {
             }
         };
 
-        // get all trips
+        // get all trips according to the search opts
         server.route({
             method: 'GET',
             path: '/trips/search/{opts}',
@@ -95,6 +95,7 @@ class Trip {
             }
         });
 
+        // get 10 trips.. not useful
         server.route({
             method: 'GET',
             path: '/trips',
@@ -102,10 +103,12 @@ class Trip {
                 auth: false,
                 handler: this.getTrips,
                 description: 'Get all trips',
-                tags: ['api', 'trip']
+                tags: ['api', 'trip'],
+                notes: 'Use /trips/search/:opts instead of this route to get better results'
             }
         });
 
+        // get all my trips
         server.route({
             method: 'GET',
             path: '/users/my/trips',
@@ -121,6 +124,7 @@ class Trip {
             }
         });
 
+        // get a particular trip of "me"
         server.route({
             method: 'GET',
             path: '/users/my/trips/{tripid}',
@@ -149,6 +153,7 @@ class Trip {
             }
         });
 
+        // get all trips of a user
         server.route({
             method: 'GET',
             path: '/users/{userid}/trips',
