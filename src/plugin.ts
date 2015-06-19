@@ -167,6 +167,59 @@ class Trip {
                 }
             }
         });
+
+        // create a new trip
+        server.route({
+            method: 'POST',
+            path: '/trips',
+            config: {
+                handler: this.createTrip,
+                description: 'Create new trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    payload: this.schema.tripSchemaPost
+                }
+            }
+        });
+
+        // update a particular trip
+        server.route({
+            method: 'PUT',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+                    return reply(this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload));
+                },
+                description: 'Update particular trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    },
+                    payload: this.schema.tripSchemaPUT
+                }
+            }
+        });
+
+        // delete a particular trip
+        server.route({
+            method: 'DELETE',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+                    reply(this.db.deleteTripById(request.params.tripid, request.auth.credentials._id));
+                },
+                description: 'delete a particular trip. Note this user must be owner of this trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string().required()
+                    }
+                }
+            }
+        });
+
         // get a (one of optional many) picture of a particular trip
         // TODO: redirect it to one special route handling pictures
         server.route({
@@ -197,6 +250,25 @@ class Trip {
                     }
                 }
 
+            }
+        });
+
+        // create a new trip with form data
+        server.route({
+            method: 'POST',
+            path: '/trips/image',
+            config: {
+                payload: imagePayload,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.createTripWithPicture,
+                },
+                description: 'Creates a new trip with form data. Used when a picture is uploaded first',
+                tags: ['api', 'trip'],
+                validate: {
+                    payload: this.schema.imageSchemaPost
+                },
+                plugins: swaggerUpload
             }
         });
 
@@ -267,77 +339,6 @@ class Trip {
                     payload: this.schema.imageSchemaPut
                 },
                 plugins: swaggerUpload
-            }
-        });
-
-
-        // create a new trip
-        server.route({
-            method: 'POST',
-            path: '/trips',
-            config: {
-                handler: this.createTrip,
-                description: 'Create new trip',
-                tags: ['api', 'trip'],
-                validate: {
-                    payload: this.schema.tripSchemaPost
-                }
-            }
-        });
-
-        // create a new trip with form data
-        server.route({
-            method: 'POST',
-            path: '/trips/image',
-            config: {
-                payload: imagePayload,
-                handler: (request, reply) => {
-                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
-                    //this.createTripWithPicture,
-                },
-                description: 'Creates a new trip with form data. Used when a picture is uploaded first',
-                tags: ['api', 'trip'],
-                validate: {
-                    payload: this.schema.imageSchemaPost
-                },
-                plugins: swaggerUpload
-            }
-
-        });
-
-        // update a particular trip
-        server.route({
-            method: 'PUT',
-            path: '/trips/{tripid}',
-            config: {
-                handler: (request, reply) => {
-                    return reply(this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload));
-                },
-                description: 'Update particular trip',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required()
-                    },
-                    payload: this.schema.tripSchemaPUT
-                }
-            }
-        });
-
-        // delete a particular trip
-        server.route({
-            method: 'DELETE',
-            path: '/trips/{tripid}',
-            config: {
-                handler: this.deleteTripById,
-                description: 'delete a particular trip. Note this user must be owner of this trip',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string().required()
-                    }
-                }
             }
         });
 
@@ -534,19 +535,6 @@ class Trip {
             }
             reply(data);
         });
-    };
-
-    /**
-     * Delete Trip by id.
-     *
-     * @param request
-     * @param reply
-     */
-    private deleteTripById = (request, reply) => {
-        this.db.deleteTripById(request.params.tripid, request.auth.credentials._id)
-            .then((data) => {
-                return reply(data);
-            }).catch(err => reply(err));
     };
 
     /**
