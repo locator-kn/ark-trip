@@ -472,13 +472,7 @@ class Trip {
         request.payload.username = request.auth.credentials.name;
         request.payload.type = 'trip';
 
-        this.db.createTrip(request.payload, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            return reply(data);
-        });
-    };
+        return reply(this.db.createTrip(request.payload));
 
     };
 
