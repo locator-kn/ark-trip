@@ -76,7 +76,7 @@ class Trip {
             }
         };
 
-        // get all trips
+        // get all trips according to the search opts
         server.route({
             method: 'GET',
             path: '/trips/search/{opts}',
@@ -95,6 +95,7 @@ class Trip {
             }
         });
 
+        // get 10 trips.. not useful
         server.route({
             method: 'GET',
             path: '/trips',
@@ -102,10 +103,12 @@ class Trip {
                 auth: false,
                 handler: this.getTrips,
                 description: 'Get all trips',
-                tags: ['api', 'trip']
+                tags: ['api', 'trip'],
+                notes: 'Use /trips/search/:opts instead of this route to get better results'
             }
         });
 
+        // get all my trips
         server.route({
             method: 'GET',
             path: '/users/my/trips',
@@ -121,6 +124,7 @@ class Trip {
             }
         });
 
+        // get a particular trip of "me"
         server.route({
             method: 'GET',
             path: '/users/my/trips/{tripid}',
@@ -149,6 +153,7 @@ class Trip {
             }
         });
 
+        // get all trips of a user
         server.route({
             method: 'GET',
             path: '/users/{userid}/trips',
@@ -167,6 +172,59 @@ class Trip {
                 }
             }
         });
+
+        // create a new trip
+        server.route({
+            method: 'POST',
+            path: '/trips',
+            config: {
+                handler: this.createTrip,
+                description: 'Create new trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    payload: this.schema.tripSchemaPost
+                }
+            }
+        });
+
+        // update a particular trip
+        server.route({
+            method: 'PUT',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+                    return reply(this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload));
+                },
+                description: 'Update particular trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    },
+                    payload: this.schema.tripSchemaPUT
+                }
+            }
+        });
+
+        // delete a particular trip
+        server.route({
+            method: 'DELETE',
+            path: '/trips/{tripid}',
+            config: {
+                handler: (request, reply) => {
+                    reply(this.db.deleteTripById(request.params.tripid, request.auth.credentials._id));
+                },
+                description: 'delete a particular trip. Note this user must be owner of this trip',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string().required()
+                    }
+                }
+            }
+        });
+
         // get a (one of optional many) picture of a particular trip
         // TODO: redirect it to one special route handling pictures
         server.route({
@@ -200,13 +258,35 @@ class Trip {
             }
         });
 
+        // create a new trip with form data
+        server.route({
+            method: 'POST',
+            path: '/trips/image',
+            config: {
+                payload: imagePayload,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.createTripWithPicture,
+                },
+                description: 'Creates a new trip with form data. Used when a picture is uploaded first',
+                tags: ['api', 'trip'],
+                validate: {
+                    payload: this.schema.imageSchemaPost
+                },
+                plugins: swaggerUpload
+            }
+        });
+
         // update/create the main picture of a trip
         server.route({
             method: ['PUT', 'POST'],
             path: '/trips/{tripid}/picture',
             config: {
                 payload: imagePayload,
-                handler: this.mainPicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    // this.mainPicture
+                },
                 description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
@@ -226,7 +306,10 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 payload: imagePayload,
-                handler: this.otherTripPicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.otherTripPicture,
+                },
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
                 tags: ['api', 'trip'],
@@ -246,7 +329,10 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 payload: imagePayload,
-                handler: this.updatePicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.updatePicture,
+                },
                 description: 'Update/Change one of the pictures of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
@@ -258,72 +344,6 @@ class Trip {
                     payload: this.schema.imageSchemaPut
                 },
                 plugins: swaggerUpload
-            }
-        });
-
-
-        // create a new trip
-        server.route({
-            method: 'POST',
-            path: '/trips',
-            config: {
-                handler: this.createTrip,
-                description: 'Create new trip',
-                tags: ['api', 'trip'],
-                validate: {
-                    payload: this.schema.tripSchemaPost
-                }
-            }
-        });
-
-        // create a new trip with form data
-        server.route({
-            method: 'POST',
-            path: '/trips/image',
-            config: {
-                payload: imagePayload,
-                handler: this.createTripWithPicture,
-                description: 'Creates a new trip with form data. Used when a picture is uploaded first',
-                tags: ['api', 'trip'],
-                validate: {
-                    payload: this.schema.imageSchemaPost
-                },
-                plugins: swaggerUpload
-            }
-
-        });
-
-        // update a particular trip
-        server.route({
-            method: 'PUT',
-            path: '/trips/{tripid}',
-            config: {
-                handler: this.updateTrip,
-                description: 'Update particular trip',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required()
-                    },
-                    payload: this.schema.tripSchemaPUT
-                }
-            }
-        });
-
-        // delete a particular trip
-        server.route({
-            method: 'DELETE',
-            path: '/trips/{tripid}',
-            config: {
-                handler: this.deleteTripById,
-                description: 'delete a particular trip. Note this user must be owner of this trip',
-                tags: ['api', 'trip'],
-                validate: {
-                    params: {
-                        tripid: this.joi.string().required()
-                    }
-                }
             }
         });
 
@@ -461,27 +481,8 @@ class Trip {
         request.payload.username = request.auth.credentials.name;
         request.payload.type = 'trip';
 
-        this.db.createTrip(request.payload, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
-            }
-            return reply(data);
-        });
-    };
+        return reply(this.db.createTrip(request.payload));
 
-    /**
-     * Update a Trip.
-     *
-     * @param request
-     * @param reply
-     */
-    private updateTrip = (request, reply) => {
-        this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload)
-            .then((data) => {
-                return reply(data);
-            }).catch((err) => {
-                return reply(err);
-            });
     };
 
     /**
@@ -539,19 +540,6 @@ class Trip {
             }
             reply(data);
         });
-    };
-
-    /**
-     * Delete Trip by id.
-     *
-     * @param request
-     * @param reply
-     */
-    private deleteTripById = (request, reply) => {
-        this.db.deleteTripById(request.params.tripid, request.auth.credentials._id)
-            .then((data) => {
-                return reply(data);
-            }).catch(err => reply(err));
     };
 
     /**

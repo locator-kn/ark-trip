@@ -34,7 +34,15 @@ class Schema {
             }),
 
             description: this.joi.string(),
-            locations: this.joi.array(),
+
+            // require hashmap with locations and its pictures
+            locations: this.joi.object().keys().min(1)
+                .pattern(/\w\d/, this.joi.object().description('Location id').keys({
+                    picture: this.joi.string(),
+                    thumbnail: this.joi.string(),
+                    googlemap: this.joi.string().required()
+                }).and('picture', 'thumbnail').min(1)
+            ).description('Hashmap with key location id and value object with image urls'),
 
             // if equipment is provided, this key must be true
             accommodation: this.joi.when('accommodation_equipment', {
@@ -44,7 +52,7 @@ class Schema {
             }),
             accommodation_equipment: this.joi.array(),
 
-            start_date: this.joi.date().min(new Date().setHours(0,0,0,0)),
+            start_date: this.joi.date().min(new Date().setHours(0, 0, 0, 0)),
             end_date: this.joi.date().min(this.joi.ref('start_date')),
 
             persons: this.joi.number().integer().min(1),
@@ -59,7 +67,7 @@ class Schema {
             delete: this.joi.boolean().default(false)
         });
 
-        var requiredSchema = tripSchema.requiredKeys('title', 'city', 'description',
+        var requiredSchema = tripSchema.requiredKeys('title', 'city', 'description', 'moods',
             'start_date', 'end_date', 'persons', 'days', 'accommodation', 'locations');
 
         // exported schemas
