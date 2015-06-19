@@ -291,7 +291,10 @@ class Trip {
             path: '/trips/image',
             config: {
                 payload: imagePayload,
-                handler: this.createTripWithPicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.createTripWithPicture,
+                },
                 description: 'Creates a new trip with form data. Used when a picture is uploaded first',
                 tags: ['api', 'trip'],
                 validate: {
