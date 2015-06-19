@@ -307,7 +307,9 @@ class Trip {
             method: 'PUT',
             path: '/trips/{tripid}',
             config: {
-                handler: this.updateTrip,
+                handler: (request, reply) => {
+                    return reply(this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload));
+                },
                 description: 'Update particular trip',
                 tags: ['api', 'trip'],
                 validate: {
@@ -478,19 +480,6 @@ class Trip {
         });
     };
 
-    /**
-     * Update a Trip.
-     *
-     * @param request
-     * @param reply
-     */
-    private updateTrip = (request, reply) => {
-        this.db.updateTrip(request.params.tripid, request.auth.credentials._id, request.payload)
-            .then((data) => {
-                return reply(data);
-            }).catch((err) => {
-                return reply(err);
-            });
     };
 
     /**
