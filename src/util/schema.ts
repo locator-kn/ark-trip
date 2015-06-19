@@ -44,7 +44,7 @@ class Schema {
             }),
             accommodation_equipment: this.joi.array(),
 
-            start_date: this.joi.date().min(Date.now().setHours(0,0,0,0)),
+            start_date: this.joi.date().min(new Date().setHours(0,0,0,0)),
             end_date: this.joi.date().min(this.joi.ref('start_date')),
 
             persons: this.joi.number().integer().min(1),
