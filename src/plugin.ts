@@ -206,7 +206,10 @@ class Trip {
             path: '/trips/{tripid}/picture',
             config: {
                 payload: imagePayload,
-                handler: this.mainPicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    // this.mainPicture
+                },
                 description: 'Update/Change the main picture of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
@@ -226,7 +229,10 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 payload: imagePayload,
-                handler: this.otherTripPicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.otherTripPicture,
+                },
                 description: 'Create one of many pictures of a particular trip',
                 notes: 'Will save a picture for this trip. Not the main picture.',
                 tags: ['api', 'trip'],
@@ -246,7 +252,10 @@ class Trip {
             path: '/trips/{tripid}/picture/more',
             config: {
                 payload: imagePayload,
-                handler: this.updatePicture,
+                handler: (request, reply) => {
+                    return reply(this.boom.resourceGone('Maybe it will come back later. Who knows'));
+                    //this.updatePicture,
+                },
                 description: 'Update/Change one of the pictures of a particular trip',
                 notes: 'The picture in the database will be updated. The User defines which one.',
                 tags: ['api', 'trip'],
