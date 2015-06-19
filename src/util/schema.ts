@@ -40,7 +40,7 @@ class Schema {
                 .pattern(/\w\d/, this.joi.object().description('Location id').keys({
                     picture: this.joi.string(),
                     thumbnail: this.joi.string(),
-                    googlemaps: this.joi.string().required()
+                    googlemap: this.joi.string().required()
                 }).and('picture', 'thumbnail').min(1)
             ).description('Hashmap with key location id and value object with image urls'),
 
