@@ -258,6 +258,11 @@ class Trip {
             }
         });
 
+
+        /**
+         * Depcrated Routes
+         */
+
         // create a new trip with form data
         server.route({
             method: 'POST',
