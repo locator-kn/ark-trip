@@ -207,6 +207,25 @@ class Trip {
             }
         });
 
+        // update a particular trip
+        server.route({
+            method: ['PUT', 'POST'],
+            path: '/trips/{tripid}/togglePublic',
+            config: {
+                handler: (request, reply) => {
+                    return reply(this.db.togglePublicTrip(request.params.tripid, request.auth.credentials._id));
+                },
+                description: 'Change a trip from private to public or vice verca',
+                tags: ['api', 'trip'],
+                validate: {
+                    params: {
+                        tripid: this.joi.string()
+                            .required()
+                    }
+                }
+            }
+        });
+
         // delete a particular trip
         server.route({
             method: 'DELETE',
