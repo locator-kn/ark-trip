@@ -129,7 +129,9 @@ class Trip {
             method: 'GET',
             path: '/users/my/trips/{tripid}',
             config: {
-                handler: this.getTripById,
+                handler: (request, reply) => {
+                    reply(this.db.getTripById(request.params.tripid))
+                },
                 description: 'Get a specific trip. Results in the same as calling GET /trips/:tripId.',
                 tags: ['api', 'trip']
             }
@@ -141,7 +143,9 @@ class Trip {
             path: '/trips/{tripid}',
             config: {
                 auth: false,
-                handler: this.getTripById,
+                handler: (request, reply) => {
+                    reply(this.db.getTripById(request.params.tripid));
+                },
                 description: 'Get particular trip by id',
                 notes: 'sample call: /trips/1222123132',
                 tags: ['api', 'trip'],
@@ -282,7 +286,7 @@ class Trip {
          * Depcrated Routes
          */
 
-        // create a new trip with form data
+            // create a new trip with form data
         server.route({
             method: 'POST',
             path: '/trips/image',
@@ -541,21 +545,6 @@ class Trip {
         this.db.getMyTrips(request.auth.credentials._id, date, (err, data) => {
             if (err) {
                 return reply(this.boom.badRequest(err));
-            }
-            reply(data);
-        });
-    };
-
-    /**
-     * Get trip by id.
-     *
-     * @param request
-     * @param reply
-     */
-    private getTripById = (request, reply) => {
-        this.db.getTripById(request.params.tripid, (err, data) => {
-            if (err) {
-                return reply(this.boom.wrap(err, 400));
             }
             reply(data);
         });
