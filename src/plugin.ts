@@ -508,12 +508,7 @@ class Trip {
 
     private getTripsOfUser = (request, reply) => {
         var date = this.getQueryDate(request.query);
-        this.db.getUserTrips(request.params.userid, date, (err, data) => {
-            if (err) {
-                return reply(this.boom.badRequest(err));
-            }
-            reply(data);
-        });
+        reply(this.db.getUserTrips(request.params.userid, date));
     };
 
     /**
