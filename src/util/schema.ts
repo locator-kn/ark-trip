@@ -61,8 +61,8 @@ class Schema {
             days: this.joi.number().integer().min(1),
 
             // optional keys upon creation
-            description_money: this.joi.string(),
-            moods: this.joi.array(),
+            description_money: this.joi.string().valid(''),
+            moods: this.joi.array().items(this.joi.string().required()),
             active: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false)
         });
