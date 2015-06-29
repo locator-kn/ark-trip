@@ -69,8 +69,7 @@ class Schema {
             delete: this.joi.boolean().default(false)
         });
 
-        var requiredSchema = tripSchema.requiredKeys('title', 'city', 'description', 'moods',
-            'start_date', 'end_date', 'persons', 'days', 'accommodation', 'locations');
+        var requiredSchema = tripSchema.requiredKeys('title', 'city', 'moods', 'days', 'accommodation', 'locations');
 
         // exported schemas
         this.tripSchemaPUT = tripSchema.required().min(1).description('Update Trip JSON object');
