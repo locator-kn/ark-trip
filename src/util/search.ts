@@ -18,7 +18,7 @@ class Search {
             city: {
                 "map": function (doc) {
                     // include only active trips in search
-                    if (doc.type == 'trip' && doc.public && doc.active == true) {
+                    if (doc.type == 'trip' && doc.public && !doc.delete && doc.public) {
                         emit(doc.city, doc);
                     }
                 }
