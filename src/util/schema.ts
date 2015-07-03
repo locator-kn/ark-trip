@@ -2,16 +2,23 @@ export default
 class Schema {
     joi:any;
     public imageValidation:any;
+    private hoek:any;
+    private regex:any;
+
+
+    // schemas
     public tripSchemaPost:any;
     public tripSchemaPUT:any;
     public imageSchemaPost:any;
     public imageSchemaPut:any;
     private basicImageSchema:any;
-    private hoek:any;
+    private imageRequestSchema:any;
+
 
     constructor() {
         this.joi = require('joi');
         this.imageValidation = require('locator-image-utility').validation;
+        this.regex = require('locator-image-utility').regex;
         this.hoek = require('hoek');
 
         this.initSchemas();
@@ -81,6 +88,15 @@ class Schema {
 
         this.imageSchemaPut = this.imageValidation.basicImageSchema;
         this.imageSchemaPut.nameOfFile = this.joi.string().min(1).required();
+
+        this.imageRequestSchema = {
+            tripid: this.joi.string()
+                .required(),
+            name: this.joi.string()
+                .required(),
+            ext: this.joi.string()
+                .required().regex(this.regex.imageExtension)
+        }
     }
 
 }
