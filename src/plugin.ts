@@ -19,7 +19,7 @@ class Trip {
     paginationDefaultSize:number = 10;
     imageUtil:any;
     uuid:any;
-    regex:any;
+    imageSize:any;
 
 
     constructor() {
@@ -32,7 +32,7 @@ class Trip {
         this._ = require('underscore');
         this.schema = new Schema();
         this.imageUtil = require('locator-image-utility').image;
-        this.regex = require('locator-image-utility').regex;
+        this.imageSize = require('locator-image-utility').size;
         this.uuid = require('node-uuid');
         this.search = new Search();
 
@@ -268,14 +268,7 @@ class Trip {
                 'trip is requested with GET /trips/:tripId',
                 tags: ['api', 'trip'],
                 validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required(),
-                        name: this.joi.string()
-                            .required(),
-                        ext: this.joi.string()
-                            .required().regex(this.regex.imageExtension)
-                    }
+                    params: this.schema.imageRequestSchema
                 }
 
             }
