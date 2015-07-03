@@ -2,6 +2,7 @@ declare var Promise:any;
 
 import Schema from './util/schema';
 import Search from './util/search';
+import {initLogging, log} from './util/logging'
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -57,6 +58,7 @@ class Trip {
         });
 
         this._register(server, options);
+        initLogging(server);
         next();
     };
 
@@ -439,54 +441,53 @@ class Trip {
     /**
      * Save picture.
      *
-     * @param info
+     * @param requestData
      * @param cropping
      * @param name
      * @param reply
      */
-    private savePicture(info:any, cropping:any, name:string, reply:any):void {
+    private savePicture(requestData:any, cropping:any, name:string, reply:any):void {
 
         // create object for processing images
-        var imageProcessor = this.imageUtil.processor(info);
+        var imageProcessor = this.imageUtil.processor(requestData);
         if (imageProcessor.error) {
             return reply(this.boom.badRequest(imageProcessor.error))
         }
 
-        // get info needed for output or database
-        var metaData = imageProcessor.createFileInformation(name);
+        // get requestData needed for output or database (filename, url, attachmentdata)
+        var pictureData = imageProcessor.createFileInformation(name);
+        var attachmentData = pictureData.attachmentData;
 
         // create a read stream and crop it
         var readStream = imageProcessor.createCroppedStream(cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
-        var thumbnailStream = imageProcessor.createCroppedStream(cropping, {x: 120, y: 120});
 
-        this.db.savePicture(info.id, metaData.attachmentData, readStream)
+        this.db.savePicture(requestData.id, attachmentData, readStream)
             .then(() => {
-                metaData.attachmentData.name = metaData.thumbnailName;
-                return this.db.savePicture(info.id, metaData.attachmentData, thumbnailStream);
+                return this.db.updateDocumentWithoutCheck(requestData.id, {images: {picture: pictureData.url}});
+            }).then((value:any) => {
+                value.imageLocation = pictureData.url;
+                reply(value).created(pictureData.url);
+            }).catch(reply)
+
+            //  save all other kinds of images after replying
+            .then(() => {
+                readStream = imageProcessor.createCroppedStream(cropping, this.imageSize.thumb.size); // Thumbnail
+                attachmentData.name = this.imageSize.thumb.name;
+                return this.db.savePicture(requestData.id, attachmentData, readStream)
             }).then(() => {
-                return this.db.updateDocumentWithoutCheck(info.id, {images: metaData.imageLocation});
-            }).then((value) => {
-                this.replySuccess(reply, metaData.imageLocation, value)
-            }).catch((err) => {
-                return reply(err);
-            });
-
+                readStream = imageProcessor.createCroppedStream(cropping, this.imageSize.mini.size); // mini
+                attachmentData.name = this.imageSize.mini.name;
+                return this.db.savePicture(requestData.id, attachmentData, readStream)
+            }).then(() => {
+                readStream = imageProcessor.createCroppedStream(cropping, this.imageSize.midi.size); // midi
+                attachmentData.name = this.imageSize.midi.name;
+                return this.db.savePicture(requestData.id, attachmentData, readStream)
+            }).then(() => {
+                readStream = imageProcessor.createCroppedStream(cropping, this.imageSize.maxi.size); // maxi
+                attachmentData.name = this.imageSize.maxi.name;
+                return this.db.savePicture(requestData.id, attachmentData, readStream)
+            }).catch(err => log(err));
     }
-
-    /**
-     * reply a success message for uploading a picture.
-     *
-     * @param reply
-     * @param imageLocation
-     */
-    private replySuccess = (reply, imageLocation, dbresponse) => {
-        reply({
-            message: 'ok',
-            imageLocation: imageLocation,
-            id: dbresponse.id,
-            rev: dbresponse.rev
-        });
-    };
 
     /**
      * create a new Trip.
