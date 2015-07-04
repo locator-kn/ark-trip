@@ -251,21 +251,23 @@ class Trip {
         });
 
         // get a (one of optional many) picture of a particular trip
-        // TODO: redirect it to one special route handling pictures
         server.route({
             method: 'GET',
             path: '/trips/{tripid}/{name}.{ext}',
             config: {
                 auth: false,
                 handler: (request, reply) => {
+                    var documentId = request.params.tripid;
+                    var name = request.params.name;
+                    var ext = request.params.ext;
+                    var size = request.query.size;
 
-                    reply().redirect('/api/v1/data/' + request.params.tripid + '/' + request.params.name + '.' + request.params.ext + '/?');
+                    if (size) {
+                        reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext + '/?size=' + size);
+                    } else {
+                        reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext);
+                    }
 
-              /*      // create file name
-                    var file = request.params.name + '.' + request.params.ext;
-
-                    // get and reply file stream from database
-                    reply(this.db.getPicture(request.params.tripid, file));*/
                 },
                 description: 'Get a picture of a ' +
                 'particular trip by id. Could be any picture of the trip.',
