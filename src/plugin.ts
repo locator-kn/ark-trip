@@ -258,11 +258,14 @@ class Trip {
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    // create file name
+
+                    reply().redirect('/api/v1/data/' + request.params.tripid + '/' + request.params.name + '.' + request.params.ext + '/?');
+
+              /*      // create file name
                     var file = request.params.name + '.' + request.params.ext;
 
                     // get and reply file stream from database
-                    reply(this.db.getPicture(request.params.tripid, file));
+                    reply(this.db.getPicture(request.params.tripid, file));*/
                 },
                 description: 'Get a picture of a ' +
                 'particular trip by id. Could be any picture of the trip.',
