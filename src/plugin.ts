@@ -263,7 +263,7 @@ class Trip {
                     var size = request.query.size;
 
                     if (size) {
-                        reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext + '/?size=' + size);
+                        reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext + '?size=' + size);
                     } else {
                         reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext);
                     }
