@@ -275,16 +275,16 @@ class Trip {
                 'trip is requested with GET /trips/:tripId',
                 tags: ['api', 'trip'],
                 validate: {
-                    params: this.schema.imageRequestSchema
+                    params: this.schema.imageRequestSchema,
+                    query: this.joi.object().keys({
+                        size: this.joi.string().valid([
+                            this.imageSize.mini.name,
+                            this.imageSize.midi.name,
+                            this.imageSize.maxi.name,
+                            this.imageSize.thumb.name
+                        ])
+                    }).unknown()
                 },
-                query: this.joi.object().keys({
-                    size: this.joi.string().valid([
-                        this.imageSize.mini.name,
-                        this.imageSize.midi.name,
-                        this.imageSize.maxi.name,
-                        this.imageSize.thumb.name
-                    ])
-                }).unknown()
             }
         });
 
