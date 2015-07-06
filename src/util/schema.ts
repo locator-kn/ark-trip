@@ -44,7 +44,7 @@ class Schema {
 
             // require hashmap with locations and its pictures
             locations: this.joi.object().keys().min(1)
-                .pattern(/\w\d/, this.joi.object().description('Location id').keys({
+                .pattern(/\w/, this.joi.object().description('Location id').keys({
                     picture: this.joi.string(),
                     thumbnail: this.joi.string(),
                     googlemap: this.joi.string().required()
