@@ -46,9 +46,8 @@ class Schema {
             locations: this.joi.object().keys().min(1)
                 .pattern(/\w/, this.joi.object().description('Location id').keys({
                     picture: this.joi.string(),
-                    thumbnail: this.joi.string(),
                     googlemap: this.joi.string().required()
-                }).and('picture', 'thumbnail').min(1)
+                })
             ).description('Hashmap with key location id and value object with image urls'),
 
             // if equipment is provided, this key must be true
@@ -71,7 +70,7 @@ class Schema {
             description_money: this.joi.string().allow(''),
             moods: this.joi.array().items(this.joi.string().required()),
 
-           // flags
+            // flags
             public: this.joi.boolean().default(true),
             delete: this.joi.boolean().default(false)
         });
