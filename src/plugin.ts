@@ -2,6 +2,7 @@ declare var Promise:any;
 
 import Schema from './util/schema';
 import Search from './util/search';
+import {initLogging, log} from './util/logging'
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -19,7 +20,7 @@ class Trip {
     paginationDefaultSize:number = 10;
     imageUtil:any;
     uuid:any;
-    regex:any;
+    imageSize:any;
 
 
     constructor() {
@@ -32,7 +33,7 @@ class Trip {
         this._ = require('underscore');
         this.schema = new Schema();
         this.imageUtil = require('locator-image-utility').image;
-        this.regex = require('locator-image-utility').regex;
+        this.imageSize = require('locator-image-utility').size;
         this.uuid = require('node-uuid');
         this.search = new Search();
 
@@ -57,6 +58,7 @@ class Trip {
         });
 
         this._register(server, options);
+        initLogging(server);
         next();
     };
 
@@ -249,18 +251,23 @@ class Trip {
         });
 
         // get a (one of optional many) picture of a particular trip
-        // TODO: redirect it to one special route handling pictures
         server.route({
             method: 'GET',
             path: '/trips/{tripid}/{name}.{ext}',
             config: {
                 auth: false,
                 handler: (request, reply) => {
-                    // create file name
-                    var file = request.params.name + '.' + request.params.ext;
+                    var documentId = request.params.tripid;
+                    var name = request.params.name;
+                    var ext = request.params.ext;
+                    var size = request.query.size;
 
-                    // get and reply file stream from database
-                    reply(this.db.getPicture(request.params.tripid, file));
+                    if (size) {
+                        reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext + '?size=' + size);
+                    } else {
+                        reply().redirect('/api/v1/data/' + documentId + '/' + name + '.' + ext);
+                    }
+
                 },
                 description: 'Get a picture of a ' +
                 'particular trip by id. Could be any picture of the trip.',
@@ -268,16 +275,8 @@ class Trip {
                 'trip is requested with GET /trips/:tripId',
                 tags: ['api', 'trip'],
                 validate: {
-                    params: {
-                        tripid: this.joi.string()
-                            .required(),
-                        name: this.joi.string()
-                            .required(),
-                        ext: this.joi.string()
-                            .required().regex(this.regex.imageExtension)
-                    }
+                    params: this.schema.imageRequestSchema
                 }
-
             }
         });
 
@@ -378,122 +377,6 @@ class Trip {
         // Register
         return 'register';
     }
-
-    private mainPicture(request:any, reply:any):void {
-        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
-            .catch(err => reply(err))
-            .then(() => {
-                var name = request.payload.nameOfTrip + '-trip';
-                var stripped = this.imageUtil.stripHapiRequestObject(request);
-                stripped.options.id = request.params.tripid;
-
-                this.savePicture(stripped.options, stripped.cropping, name, reply)
-            });
-    }
-
-
-    private otherTripPicture(request:any, reply:any):void {
-        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
-            .catch((err) => reply(err))
-            .then(() => {
-                var name = this.uuid.v4();
-                var stripped = this.imageUtil.stripHapiRequestObject(request);
-                stripped.options.id = request.params.tripid;
-
-                this.savePicture(stripped.options, stripped.cropping, name, reply)
-            });
-    }
-
-    /**
-     * Function to update picture.
-     * @param request
-     * @param reply
-     */
-    private updatePicture(request, reply) {
-        var name = request.payload.nameOfFile;
-
-        this.isItMyTrip(request.aut.credentials._id, request.params.tripid)
-            .then(() => {
-                return this.db.entryExist(request.params.tripid, name)
-            }).then(() => {
-                var stripped = this.imageUtil.stripHapiRequestObject(request);
-                stripped.options.id = request.params.tripid;
-
-                this.savePicture(stripped.options, stripped.cropping, name, reply)
-            }).catch((err) => reply(err));
-    }
-
-    private createTripWithPicture(request, reply) {
-        // create an empty "preTrip" before uploading a picture
-        var userid = request.auth.credentials._id;
-        this.db.createTrip({type: "preTrip", userid: userid}, (err, data) => {
-            if (err) {
-                return reply(this.boom.badRequest(err));
-            }
-
-            // get user id from authentication credentials
-            request.payload.userid = userid;
-
-            var stripped = this.imageUtil.stripHapiRequestObject(request);
-            stripped.options.id = data.id;
-            name = request.payload.nameOfTrip + '-trip';
-
-            // save picture to the just created document
-            this.savePicture(stripped.options, stripped.cropping, name, reply)
-        });
-    }
-
-    /**
-     * Save picture.
-     *
-     * @param info
-     * @param cropping
-     * @param name
-     * @param reply
-     */
-    private savePicture(info:any, cropping:any, name:string, reply:any):void {
-
-        // create object for processing images
-        var imageProcessor = this.imageUtil.processor(info);
-        if (imageProcessor.error) {
-            return reply(this.boom.badRequest(imageProcessor.error))
-        }
-
-        // get info needed for output or database
-        var metaData = imageProcessor.createFileInformation(name);
-
-        // create a read stream and crop it
-        var readStream = imageProcessor.createCroppedStream(cropping, {x: 1500, y: 675});  // TODO: size needs to be discussed
-        var thumbnailStream = imageProcessor.createCroppedStream(cropping, {x: 120, y: 120});
-
-        this.db.savePicture(info.id, metaData.attachmentData, readStream)
-            .then(() => {
-                metaData.attachmentData.name = metaData.thumbnailName;
-                return this.db.savePicture(info.id, metaData.attachmentData, thumbnailStream);
-            }).then(() => {
-                return this.db.updateDocumentWithoutCheck(info.id, {images: metaData.imageLocation});
-            }).then((value) => {
-                this.replySuccess(reply, metaData.imageLocation, value)
-            }).catch((err) => {
-                return reply(err);
-            });
-
-    }
-
-    /**
-     * reply a success message for uploading a picture.
-     *
-     * @param reply
-     * @param imageLocation
-     */
-    private replySuccess = (reply, imageLocation, dbresponse) => {
-        reply({
-            message: 'ok',
-            imageLocation: imageLocation,
-            id: dbresponse.id,
-            rev: dbresponse.rev
-        });
-    };
 
     /**
      * create a new Trip.
@@ -621,30 +504,6 @@ class Trip {
             offset = (page - 1) * page_size;
         return {page_size: page_size, offset: offset};
     };
-
-    /**
-     * Utility method for checking if the given userid belongs to the given tripid
-     * @param userid
-     * @param tripid
-     * @returns {Promise|Promise<T>}
-     */
-    private isItMyTrip(userid:string, tripid:string):any {
-        return new Promise((reject, resolve) => {
-
-            this.db.getTripById(tripid, (err, data) => {
-
-                if (err) {
-                    return reject(this.boom.badRequest(err));
-                }
-
-                if (!data.userid || data.userid !== userid) {
-                    return reject(this.boom.forbidden());
-                }
-
-                return resolve(data);
-            });
-        });
-    }
 
     private getQueryDate(query:any):Date {
         if (!query || !query.date) {
