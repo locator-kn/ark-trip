@@ -1,6 +1,6 @@
 {
   "name": "ark-trip",
-  "version": "9.0.6",
+  "version": "9.1.0",
   "description": "Plugin to handle trips",
   "main": "index.js",
   "scripts": {
