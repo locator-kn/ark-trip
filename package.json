@@ -34,6 +34,7 @@
     "hoek": "^2.14.0",
     "joi": "^6.2.0",
     "locator-image-utility": "latest",
+    "node-schedule": "^0.2.9",
     "node-uuid": "^1.4.3",
     "sinon": "^1.14.1",
     "typescript": "^1.5.0-alpha",

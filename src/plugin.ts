@@ -2,7 +2,7 @@ declare var Promise:any;
 
 import Schema from './util/schema';
 import Search from './util/search';
-import {initLogging, log} from './util/logging'
+import {initLogging, log, logError} from './util/logging'
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -21,6 +21,7 @@ class Trip {
     imageUtil:any;
     uuid:any;
     imageSize:any;
+    scheduler:any;
 
 
     constructor() {
@@ -36,6 +37,8 @@ class Trip {
         this.imageSize = require('locator-image-utility').size;
         this.uuid = require('node-uuid');
         this.search = new Search();
+        this.scheduler = require('node-schedule');
+
 
     }
 
@@ -63,6 +66,9 @@ class Trip {
     };
 
     private _register(server, options) {
+
+        this.registerScheduledJob();
+        
         // payload for image
         var imagePayload = {
             output: 'stream',
@@ -514,5 +520,28 @@ class Trip {
             return null;
         }
         return query.date;
+    }
+
+    private registerScheduledJob():void {
+        // every day at 02:00
+        var job = this.scheduler.scheduleJob('0 2 * * *', () => {
+            // check integrity of all locations
+            this.db.getAllTrips().then(res => {
+
+                res.forEach((trip:any) => {
+
+                    this.joi.validate(trip, this.schema.tripSchemaPost.unknown(), (err, result) => {
+                        if (result.preTrip) {
+                            return;
+                        }
+
+                        if (err) {
+                            logError('This trip is corrupt: ' + trip._id + ' Because of: ' + err)
+                        }
+                    })
+
+                })
+            }).catch(err => logError(err));
+        })
     }
 }

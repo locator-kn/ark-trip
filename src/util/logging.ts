@@ -11,5 +11,15 @@ export function log(logging:string) {
         return;
     }
 
-    server.log(logging);
+    server.log(['trip'], logging);
+}
+
+
+export function logError(logging:string) {
+    if (!server) {
+        console.error('Server not initialized for logging');
+        return;
+    }
+
+    server.log(['trip', 'Error'], logging);
 }
