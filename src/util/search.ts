@@ -53,17 +53,20 @@ class Search {
                         // do not check date, if mood check don't successful..
                         if (toPush) {
                             if (req.query.start_date && req.query.end_date) {
+                                possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_DATE;
                                 // check date range of trip
                                 if (req.query.end_date < row.value.start_date || req.query.end_date > row.value.end_date) {
                                     // don't add trip if is out of range
                                     toPush = false;
+                                } else {
+                                    relevance.date = RELEVANCE_CONFIG.RELEVANCE_DATE;
                                 }
                             }
                         }
                         // if date and moods okay, check further params for relevance calculation
                         if (toPush) {
                             if (req.query.moods) {
-                                possibleRelevance = RELEVANCE_CONFIG.RELEVANCE_MOODS;
+                                possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_MOODS;
                                 if(req.query.moods == row.value.moods[0]){
                                     relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS;
                                 }
