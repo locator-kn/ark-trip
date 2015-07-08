@@ -28,9 +28,10 @@ class Search {
             searchlist: function (head, req) {
                 var RELEVANCE_CONFIG = {
                     RELEVANCE_SUM: 1,
-                    RELEVANCE_MOODS: 0.5,
-                    RELEVANCE_DAYS: 0.3,
-                    RELEVANCE_PERSONS: 0.2
+                    RELEVANCE_MOODS: 0.4,
+                    RELEVANCE_DAYS: 0.1,
+                    RELEVANCE_PERSONS: 0.2,
+                    RELEVANCE_DATE: 0.3
                 };
                 var row;
                 var result = [];
@@ -38,40 +39,22 @@ class Search {
                 while (row = getRow()) {
                     // city param is required
                     if (queryParams != '{}' && (row.key.id == req.query.city)) {
-                        var moods_relevance;
                         var possibleRelevance = 0;
                         // status object for relevance check
                         var relevance = {
                             moods: 0,
                             persons: 0,
-                            days: 0
+                            days: 0,
+                            date: 0
                         };
                         // set 'toPush' variable true and set it only false, if required param like mood don't hit
                         var toPush = true;
-                        if (req.query.moods) {
-                            // set 'toPush' false -> don't add row to result list
-                            toPush = false;
-                            // object for relevance calculation of moods
-                            moods_relevance = {
-                                moods_sum: 0,
-                                moods_hit: 0
-                            };
-                            // split params to get all moods
-                            var moods = req.query.moods.split('.');
-                            // check if trip contains requried mood
-                            moods.forEach(function (mood) {
-                                moods_relevance.moods_sum++;
-                                if (row.value.moods.indexOf(mood) > -1) {
-                                    toPush = true;
-                                    moods_relevance.moods_hit++;
-                                }
-                            });
-                        }
+
                         // do not check date, if mood check don't successful..
                         if (toPush) {
                             if (req.query.start_date && req.query.end_date) {
                                 // check date range of trip
-                                if (req.query.start_date > row.value.start_date || req.query.end_date < row.value.end_date) {
+                                if (req.query.end_date < row.value.start_date || req.query.end_date > row.value.end_date) {
                                     // don't add trip if is out of range
                                     toPush = false;
                                 }
@@ -81,7 +64,9 @@ class Search {
                         if (toPush) {
                             if (req.query.moods) {
                                 possibleRelevance = RELEVANCE_CONFIG.RELEVANCE_MOODS;
-                                relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS / moods_relevance.moods_sum * moods_relevance.moods_hit;
+                                if(req.query.moods == row.value.moods[0]){
+                                    relevance.moods = RELEVANCE_CONFIG.RELEVANCE_MOODS;
+                                }
                             }
                             if (req.query.persons) {
                                 possibleRelevance += RELEVANCE_CONFIG.RELEVANCE_PERSONS;

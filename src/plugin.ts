@@ -445,7 +445,7 @@ class Trip {
         // create query for couchdb
         var query = {
             city: (city || ""),
-            moods: (opts.join('.') || ""),
+            moods: (request.query.moods || ""),
             start_date: (request.query.start_date || ""),
             end_date: (request.query.end_date || ""),
             persons: (request.query.persons || ""),
