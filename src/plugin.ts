@@ -456,8 +456,12 @@ class Trip {
                 return reply(this.boom.wrap(err, 400));
             }
             // if trips with query params found
-            if (data.length > 0) {
-                this._.sortBy(data, 'relevance');
+            if (data.length) {
+                data.sort(function (a, b) {
+                    if (a.relevance < b.relevance) return 1;
+                    if (a.relevance > b.relevance) return -1;
+                    return 0;
+                });
                 reply(this.getPaginatedItems(request, data));
             } else {
                 // if no trips found return all trips of city
