@@ -2,7 +2,7 @@ declare var Promise:any;
 
 import Schema from './util/schema';
 import Search from './util/search';
-import {initLogging, log, logError} from './util/logging'
+import {initLogging, log, logError, logCorrupt} from './util/logging'
 
 export interface IRegister {
     (server:any, options:any, next:any): void;
@@ -536,7 +536,7 @@ class Trip {
                         }
 
                         if (err) {
-                            logError('This trip is corrupt: ' + trip._id + ' Because of: ' + err)
+                            logCorrupt('This trip is corrupt: ' + trip._id + ' Because of: ' + err)
                         }
                     })
 
