@@ -10,14 +10,12 @@ export default
 class Search {
 
     public viewName_Search = '_design/search';
-
-    // TODO: performance measurement for relevance check
     // list for couchdb the search a trip
     public searchList = {
         views: {
             city: {
                 "map": function (doc) {
-                    // include only active trips in search
+                    // include only public and not deleted trips in search
                     if (doc.type == 'trip' && doc.public && !doc.delete && doc.public) {
                         emit(doc.city, doc);
                     }

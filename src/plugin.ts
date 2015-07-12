@@ -74,14 +74,7 @@ class Trip {
             output: 'stream',
             parse: true,
             allow: 'multipart/form-data',
-            // TODO: evaluate real value
             maxBytes: 1048576 * 6 // 6MB
-        };
-
-        var swaggerUpload = {
-            'hapi-swagger': {
-                payloadType: 'form'
-            }
         };
 
         // get all trips according to the search opts
@@ -305,8 +298,7 @@ class Trip {
                 tags: ['api', 'trip'],
                 validate: {
                     payload: this.schema.imageSchemaPost
-                },
-                plugins: swaggerUpload
+                }
             }
         });
 
@@ -328,8 +320,7 @@ class Trip {
                         tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
-                },
-                plugins: swaggerUpload
+                }
             }
         });
 
@@ -351,8 +342,7 @@ class Trip {
                         tripid: this.joi.string().required()
                     },
                     payload: this.schema.imageSchemaPost
-                },
-                plugins: swaggerUpload
+                }
             }
         });
 
@@ -375,8 +365,7 @@ class Trip {
                             .required()
                     },
                     payload: this.schema.imageSchemaPut
-                },
-                plugins: swaggerUpload
+                }
             }
         });
 
