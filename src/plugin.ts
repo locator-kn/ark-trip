@@ -422,7 +422,7 @@ class Trip {
      */
     private getMyTrips = (request, reply) => {
         var date = this.getQueryDate(request.query);
-        reply(this.db.getUserTrips(request.auth.credentials._id, date, request.query));
+        reply(this.db.getMyTrips(request.auth.credentials._id, date, request.query));
     };
 
     /**
