@@ -68,7 +68,7 @@ class Trip {
     private _register(server, options) {
 
         this.registerScheduledJob();
-        
+
         // payload for image
         var imagePayload = {
             output: 'stream',
@@ -118,9 +118,11 @@ class Trip {
                 description: 'Get all my trips',
                 tags: ['api', 'trip'],
                 validate: {
-                    query: {
-                        date: this.joi.date()
-                    }
+                    query: this.joi.object().keys({
+                        date: this.joi.date(),
+                        page: this.joi.number().integer().min(0),
+                        elements: this.joi.number().integer().min(0)
+                    }).unknown().and('page', 'elements')
                 }
             }
         });
@@ -171,9 +173,11 @@ class Trip {
                     params: {
                         userid: this.joi.string().required()
                     },
-                    query: {
-                        date: this.joi.date()
-                    }
+                    query: this.joi.object().keys({
+                        date: this.joi.date(),
+                        page: this.joi.number().integer().min(0),
+                        elements: this.joi.number().integer().min(0)
+                    }).unknown().and('page', 'elements')
                 }
             }
         });
