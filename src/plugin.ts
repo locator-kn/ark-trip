@@ -411,7 +411,7 @@ class Trip {
 
     private getTripsOfUser = (request, reply) => {
         var date = this.getQueryDate(request.query);
-        reply(this.db.getUserTrips(request.params.userid, date));
+        reply(this.db.getUserTrips(request.params.userid, date, request.query));
     };
 
     /**
