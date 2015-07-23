@@ -68,7 +68,7 @@ class Trip {
     private _register(server, options) {
 
         this.registerScheduledJob();
-        
+
         // payload for image
         var imagePayload = {
             output: 'stream',
@@ -118,9 +118,11 @@ class Trip {
                 description: 'Get all my trips',
                 tags: ['api', 'trip'],
                 validate: {
-                    query: {
-                        date: this.joi.date()
-                    }
+                    query: this.joi.object().keys({
+                        date: this.joi.date(),
+                        page: this.joi.number().integer().min(0),
+                        elements: this.joi.number().integer().min(0)
+                    }).unknown().and('page', 'elements')
                 }
             }
         });
@@ -171,9 +173,11 @@ class Trip {
                     params: {
                         userid: this.joi.string().required()
                     },
-                    query: {
-                        date: this.joi.date()
-                    }
+                    query: this.joi.object().keys({
+                        date: this.joi.date(),
+                        page: this.joi.number().integer().min(0),
+                        elements: this.joi.number().integer().min(0)
+                    }).unknown().and('page', 'elements')
                 }
             }
         });
@@ -407,7 +411,7 @@ class Trip {
 
     private getTripsOfUser = (request, reply) => {
         var date = this.getQueryDate(request.query);
-        reply(this.db.getUserTrips(request.params.userid, date));
+        reply(this.db.getUserTrips(request.params.userid, date, request.query));
     };
 
     /**
@@ -418,12 +422,7 @@ class Trip {
      */
     private getMyTrips = (request, reply) => {
         var date = this.getQueryDate(request.query);
-        this.db.getMyTrips(request.auth.credentials._id, date, (err, data) => {
-            if (err) {
-                return reply(this.boom.badRequest(err));
-            }
-            reply(data);
-        });
+        reply(this.db.getMyTrips(request.auth.credentials._id, date, request.query));
     };
 
     /**
